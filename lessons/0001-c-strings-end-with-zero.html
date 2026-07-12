@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Libft 0001 — Find the end of a C string</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <p class="kicker">Libft · Lesson 0001 · 15 minutes</p>
+  <h1>Find the end of a C string</h1>
+  <p class="meta">Goal: implement your own <code>ft_strlen</code>.</p>
+
+  <h2>What you need</h2>
+  <ul>
+    <li>A C string is a sequence of characters followed by <code>'\0'</code>.</li>
+    <li><code>s[0]</code> is its first character, <code>s[1]</code> is its second, and so on.</li>
+    <li><code>ft_strlen</code> counts the characters before <code>'\0'</code>. It does not count <code>'\0'</code>.</li>
+  </ul>
+
+  <pre><code>index:       0     1     2     3
+character:  'c'   'a'   't'   '\0'
+
+The string length is 3.</code></pre>
+
+  <h2>Exercise</h2>
+  <p>Complete <code>ft_strlen</code>. Do not use the library function <code>strlen</code>.</p>
+
+  <pre><code>#include &lt;stdio.h&gt;
+
+size_t ft_strlen(const char *s)
+{
+    /* Write your code here. */
+}
+
+int main(void)
+{
+    printf("%zu\n", ft_strlen("cat"));
+    printf("%zu\n", ft_strlen(""));
+    printf("%zu\n", ft_strlen("42 Singapore"));
+    return (0);
+}</code></pre>
+
+  <p>Compile and run:</p>
+  <pre><code>cc -Wall -Wextra -Werror practice.c &amp;&amp; ./a.out</code></pre>
+
+  <p>Your output should be:</p>
+  <pre><code>3
+0
+12</code></pre>
+
+  <p><strong>Send me your completed <code>ft_strlen</code> function.</strong> I’ll review it, ask one short question to check your understanding, and then prepare the next lesson.</p>
+
+  <footer>
+    Optional reference: <a href="https://man.openbsd.org/strlen.3">OpenBSD strlen(3)</a>. You only need its DESCRIPTION and RETURN VALUES sections. Ask me about any symbol or instruction that is unclear.
+  </footer>
+</main>
+</body>
+</html>

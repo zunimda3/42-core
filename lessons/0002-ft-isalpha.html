@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Libft 0002 — Test for a letter</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <p class="kicker">Libft · Lesson 0002 · 15 minutes</p>
+  <h1>Test for a letter</h1>
+  <p class="meta">Goal: implement <code>ft_isalpha</code>.</p>
+
+  <h2>What you need</h2>
+  <ul>
+    <li>In this project, a letter is one of <code>A</code>–<code>Z</code> or <code>a</code>–<code>z</code>.</li>
+    <li>The function receives an <code>int</code> and returns <code>1</code> for a letter or <code>0</code> otherwise.</li>
+    <li>Use comparisons: <code>c &gt;= 'A' &amp;&amp; c &lt;= 'Z'</code> describes the uppercase range.</li>
+  </ul>
+
+  <h2>Exercise</h2>
+  <p>Complete <code>ft_isalpha</code>. Do not use the library function <code>isalpha</code>.</p>
+
+  <pre><code>#include &lt;stdio.h&gt;
+
+int ft_isalpha(int c)
+{
+    /* Write your code here. */
+}
+
+int main(void)
+{
+    printf("%d\n", ft_isalpha('A'));
+    printf("%d\n", ft_isalpha('z'));
+    printf("%d\n", ft_isalpha('4'));
+    printf("%d\n", ft_isalpha(' '));
+    return (0);
+}</code></pre>
+
+  <p>Compile and run:</p>
+  <pre><code>cc -Wall -Wextra -Werror practice.c &amp;&amp; ./a.out</code></pre>
+
+  <p>Your output should be:</p>
+  <pre><code>1
+1
+0
+0</code></pre>
+
+  <p><strong>Send me your completed function.</strong> I’ll check it and then give you one boundary case to add to your test.</p>
+
+  <footer>
+    Optional reference: <a href="https://man.openbsd.org/isalpha.3">OpenBSD isalpha(3)</a>. For this exercise, use the A–Z and a–z rule above. Ask me about any symbol or instruction that is unclear.
+  </footer>
+</main>
+</body>
+</html>
