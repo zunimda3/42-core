@@ -2,8 +2,10 @@
 
 ## Knowledge
 
+- [`00-libft-en.pdf`](./00-libft-en.pdf)
+  Main instruction sheet and controlling source for the learner's Libft learning sequence, project requirements, deliverables, and function list.
 - [Current 42 Libft subject mirror — 42 Cursus GitBook](https://42-cursus.gitbook.io/guide/0-rank-00/libft/subject)
-  Use for: the project deliverables and function list. Confirm against the subject PDF in the student's intra when available, because mirrors can lag curriculum revisions.
+  Use only as a convenient secondary reference. Confirm its content against `00-libft-en.pdf`, because mirrors can lag curriculum revisions.
 - [OpenBSD manual: `strlcpy` and `strlcat`](https://man.openbsd.org/strlcpy.3)
   Primary implementation-family documentation for exact size, termination, return-value, truncation, and overlap contracts.
 - [The Open Group: `<string.h>`](https://pubs.opengroup.org/onlinepubs/009696799/basedefs/string.h.html)
@@ -26,5 +28,4 @@
 
 ## Gaps
 
-- Add the exact current Libft subject PDF from the user's 42 intra when available; it is the controlling source.
 - Add campus-approved Norm and evaluation references once the user's campus/tooling environment is known.

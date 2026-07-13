@@ -12,7 +12,8 @@ Prepare for the 42 Common Core by building Libft independently and defensibly. T
 
 ## Constraints
 - Current focus is Libft; later Common Core projects should not dilute it.
-- Exercises may be drawn from the selected GitHub repositories, but claims and function contracts must be checked against primary or authoritative sources.
+- Use `00-libft-en.pdf` as the main instruction sheet and controlling source for the learning sequence, project requirements, deliverables, and function contracts.
+- Exercises may be drawn from the selected GitHub repositories, but any conflict with those materials must be resolved in favor of `00-libft-en.pdf`; authoritative standards and manuals may supplement the subject where useful.
 - Starting level: completed and passed the 42 Piscine; basic C syntax and problem-solving should not be retaught without evidence of a gap.
 
 ## Out of scope
