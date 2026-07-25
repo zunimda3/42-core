@@ -1,33 +1,44 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strlcat.c                                       :+:      :+:    :+:   */
+/*   ft_memmove1.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/20 11:04:28 by z                 #+#    #+#             */
-/*   Updated: 2026/07/21 21:05:03 by z                ###   ########.fr       */
+/*   Created: 2026/07/25 17:01:18 by z                 #+#    #+#             */
+/*   Updated: 2026/07/25 17:17:46 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stddef.h>
+#include <string.h>
 
-size_t	ft_strlcat(char *dst, const char *src, size_t dstsize)
+void	*memmove(void *dest, const void *src, size_t n)
 {
-	size_t	i;
-	size_t	j;
+	unsigned char		*d;
+	const unsigned char	*s;
+	size_t				i;
+	size_t				len;
 
-	i = 0;
-	while (i < dstsize && dst[i])
+	d = dest;
+	s = src;
+	if (d < s)
 	{
-		i++;
+		i = 0;
+		while (i < n)
+		{
+			d[i] = s[i];
+			i++;
+		}
 	}
-	j = 0;
-	while ((i + j) < dstsize && src[j])
+	else
 	{
-		dst[i] = src[j];
-		i++;
-		j++;
+		i = n - 1;
+		while (i > 0)
+		{
+			d[i] = s[i];
+			i--;
+		}
 	}
-	return (i + j);
+	return (d);
 }

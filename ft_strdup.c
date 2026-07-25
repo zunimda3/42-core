@@ -1,33 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strlcat.c                                       :+:      :+:    :+:   */
+/*   ft_strdup.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/20 11:04:28 by z                 #+#    #+#             */
-/*   Updated: 2026/07/21 21:05:03 by z                ###   ########.fr       */
+/*   Created: 2026/07/25 17:26:47 by z                 #+#    #+#             */
+/*   Updated: 2026/07/25 17:31:09 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
-size_t	ft_strlcat(char *dst, const char *src, size_t dstsize)
+char	*strdup(const char *s)
 {
+	char	*res;
 	size_t	i;
-	size_t	j;
+	size_t	len;
 
 	i = 0;
-	while (i < dstsize && dst[i])
+	len = strlen(s);
+	res = malloc((len + 1) * sizeof(char));
+	if (!res)
+		return (NULL);
+	while (s[i])
 	{
+		res[i] = s[i];
 		i++;
 	}
-	j = 0;
-	while ((i + j) < dstsize && src[j])
-	{
-		dst[i] = src[j];
-		i++;
-		j++;
-	}
-	return (i + j);
+	res[i] = '\0';
+	return (res);
 }
