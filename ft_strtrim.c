@@ -1,35 +1,47 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strdup.c                                        :+:      :+:    :+:   */
+/*   ft_strtrim.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/31 21:39:44 by z                 #+#    #+#             */
-/*   Updated: 2026/07/31 21:40:05 by z                ###   ########.fr       */
+/*   Created: 2026/07/25 20:07:31 by z                 #+#    #+#             */
+/*   Updated: 2026/07/25 20:07:31 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
-char	*ft_strdup(const char *s)
+char	*ft_strtrim(char const *s1, char const *set)
 {
-	size_t	i;
-	size_t	len;
 	char	*res;
+	size_t	i;
+	size_t	j;
+	size_t	k;
 
-	len = 0;
-	while (s[len])
-		len++;
-	res = malloc((len + 1) * sizeof(char));
+	if (!s1 || !set)
+		return (NULL);
+	res = malloc((strlen(s1) + 1) * sizeof(char));
 	if (!res)
 		return (NULL);
 	i = 0;
-	while (s[i])
+	k = 0;
+	while (set[i])
 	{
-		res[i] = s[i];
+		j = 0;
+		while (s1[j])
+		{
+			if (s1[j] != set[i])
+				res[k] = s1[j];
+			j++;
+			k++;
+		}
 		i++;
 	}
-	res[i] = 0;
+	if (!res)
+		res[0] = '\0';
+	res[k] = '\0';
 	return (res);
 }

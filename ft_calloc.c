@@ -1,35 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strdup.c                                        :+:      :+:    :+:   */
+/*   ft_calloc.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/31 21:39:44 by z                 #+#    #+#             */
-/*   Updated: 2026/07/31 21:40:05 by z                ###   ########.fr       */
+/*   Created: 2026/07/31 21:18:30 by z                 #+#    #+#             */
+/*   Updated: 2026/07/31 21:19:23 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdint.h>
 #include <stdlib.h>
 
-char	*ft_strdup(const char *s)
+void	*ft_calloc(size_t nmemb, size_t size)
 {
 	size_t	i;
-	size_t	len;
 	char	*res;
 
-	len = 0;
-	while (s[len])
-		len++;
-	res = malloc((len + 1) * sizeof(char));
+	if (nmemb != 0 && size > (SIZE_MAX / nmemb))
+		return (NULL);
+	res = malloc(nmemb * size);
 	if (!res)
 		return (NULL);
 	i = 0;
-	while (s[i])
-	{
-		res[i] = s[i];
-		i++;
-	}
-	res[i] = 0;
+	while (i < (nmemb * size))
+		res[i++] = 0;
 	return (res);
 }
