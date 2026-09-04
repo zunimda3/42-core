@@ -18,25 +18,29 @@ update, but it must not edit this file until the learner approves the exact chan
 
 - **Milestone:** 1 — interface and architecture decisions
 - **Status:** `IMPLEMENTING`
-- **Next small step:** identify the minimum caller-owned context fields and explain
-  why each must persist beyond the parser call.
+- **Next small step:** stabilize the earliest implemented stack foundation by
+  reconciling the obsolete generic `ft_lstiter.c`, then compile and test the three
+  specialized stack helpers before designing later components.
+- **Paused design question:** operation metrics and emission remain undecided until
+  the operation engine is the next implementation dependency.
 - **Outstanding team requirement:** the subject requires exactly two learners, but a
   partner has not yet been confirmed; this does not block architecture learning.
 
 ## Current Repository Baseline
 
-Observed on 2026-09-01:
+Observed on 2026-09-04:
 
-- The `push_swap/` directory is entirely untracked in its parent Git repository.
-- Present source work: six linked-list helpers and `node.h` using a generic
-  `void *content` node.
+- Present source work: `node.h`, three specialized stack helpers, and one obsolete
+  generic `ft_lstiter.c`.
+- `node.h` now defines typed `value`, `rank`, and `next` node fields plus a stack
+  wrapper with authoritative `top` and `size`.
 - Missing major deliverables: `main`, parser, operations, strategies, benchmark mode,
   Makefile, and README.
 - `cc`, `make`, and `norminette` are available.
 - Valgrind and a checker binary are not currently available; compiler sanitizers can
   provide interim memory diagnostics.
-- Current sources pass syntax-only compilation with `-Wall -Wextra -Werror`.
-- `ft_lstnew.c` currently has one Norm error: its return value needs parentheses.
+- Strict syntax-only compilation currently fails because `ft_lstiter.c` still reads
+  the removed generic `content` field.
 - Existing files are learner work and must not be rewritten or discarded without
   explicit approval.
 
@@ -87,6 +91,9 @@ Do not record a design as final merely because an AI suggested it.
 | Stack helper interface | Keep generic traversal helpers vs. retain only helpers required by the stack abstraction | Removed `ft_lstlast` and `ft_lstsize`: no current operation requires the former, while the latter would duplicate the authoritative `t_stack.size`. The minimal interface currently contains node creation, add-to-top, and cleanup. | `naamir` |
 | Input and flag grammar | Strict flags-before-integers grammar vs. accepting flags anywhere | Use `push_swap [--bench] [one strategy selector] integers...`: all flags precede the first integer; `--bench` may combine with one selector; repeated flags, conflicting selectors, or a flag after integer parsing begins are invalid; adaptive is the default selector; no arguments print nothing. This is deterministic and keeps parsing state simple. | `naamir` |
 | Parser ownership contract | Parser cleans partial state vs. caller owns one initialized context for the whole run | `main` owns the context and always clears stack `a`; the parser transfers each allocated node immediately into `a`, returns status without printing, and may leave an owned partial stack on failure. `main` performs cleanup and is the single source of `Error\n` output. This keeps allocation ownership and error output centralized. | `naamir` |
+| Input node construction order | Insert each argument at the top vs. append each argument at the bottom; parser-local tail vs. persistent stack tail | Chose left-to-right bottom insertion with a parser-local tail so the first integer remains the top of `a`, construction is O(n), and `t_stack` keeps only its existing `top` and `size` invariants. Parser work does not count as generated Push_swap operations. | `naamir` |
+| Persistent run-state organization | One program context vs. separate stack, option, disorder, and metrics objects | Chose one caller-owned context to carry both stacks, the selected strategy, benchmark state, initial disorder, and operation counters across parsing, sorting, reporting, and cleanup. This centralizes lifetime and avoids globals. | `naamir` |
+| Strategy representation | Retain the selector string vs. parse once into an enum | Store a `t_strategy` enum in the context, initialized to adaptive before parsing. Valid selectors replace that value, so sorting happens only after complete successful parsing and can dispatch without repeated string comparisons. | `naamir` |
 | Simple strategy | Pending | Pending | Pending |
 | Medium strategy | Pending | Pending | Pending |
 | Complex strategy | Pending | Pending | Pending |
@@ -100,14 +107,13 @@ The final `README.md` must contain an accurate human-readable summary for both l
 
 | Learner | Confirmed contributions |
 | --- | --- |
-| `naamir` | Initial linked-list exploration; compared representations and selected a specialized singly linked node plus stack wrapper with explicit ownership invariants; drafted the specialized types in `node.h`; implemented `ft_lstadd_top` to update both `top` and `size`; initialized new nodes with unassigned rank `-1`; implemented stack cleanup that frees all nodes and resets both invariants; removed redundant traversal helpers to keep `t_stack.size` authoritative; selected the strict flags-before-integers input grammar and caller-owned parser lifetime contract |
+| `naamir` | Initial linked-list exploration; compared representations and selected a specialized singly linked node plus stack wrapper with explicit ownership invariants; drafted the specialized types in `node.h`; implemented `ft_lstadd_top` to update both `top` and `size`; initialized new nodes with unassigned rank `-1`; implemented stack cleanup that frees all nodes and resets both invariants; removed redundant traversal helpers to keep `t_stack.size` authoritative; selected the strict flags-before-integers input grammar, caller-owned parser lifetime contract, O(n) left-to-right bottom insertion using a parser-local non-owning tail, a single caller-owned program context, and an adaptive-default strategy enum; explained that stack `a`, not the local alias, retains ownership after parsing |
 | Partner pending | None yet |
 
 ## Latest Session Handoff
 
-- **Last confirmed achievement:** correctly traced partial-parse cleanup and explained
-  that freeing a node after transferring it into stack `a` would leave `main` to
-  traverse and free the same allocation again.
+- **Last confirmed achievement:** changed the working cadence to implement and test
+  each agreed slice before discussing the next unresolved dependency.
 - **Open question:** who is the required second learner?
-- **Resume with:** teach the difference between transient parser locals and persistent
-  program state, then have the learner propose the minimum context fields.
+- **Resume with:** inspect the `ft_lstiter.c` compile failure, reconcile it with the
+  confirmed minimal specialized helper interface, and rerun strict compilation.
