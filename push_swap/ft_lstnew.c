@@ -6,20 +6,21 @@
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 21:32:06 by z                 #+#    #+#             */
-/*   Updated: 2026/09/01 21:39:32 by z                ###   ########.fr       */
+/*   Updated: 2026/09/02 15:26:27 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "node.h"
 
-t_list	*ft_lstnew(void *content)
+t_node	*ft_lstnew(int value)
 {
-	t_list	*new;
+	t_node	*new;
 
-	new = malloc(sizeof(t_list));
+	new = malloc(sizeof(t_node));
 	if (!new)
-		return NULL;
-	new->content = content;
+		return (NULL);
+	new->value = value;
 	new->next = NULL;
+	new->rank = -1;
 	return (new);
 }

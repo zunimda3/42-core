@@ -1,26 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstsize.c                                       :+:      :+:    :+:   */
+/*   ft_lstadd_top.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/01 21:41:46 by z                 #+#    #+#             */
-/*   Updated: 2026/09/01 21:44:06 by z                ###   ########.fr       */
+/*   Created: 2026/09/01 21:37:31 by z                 #+#    #+#             */
+/*   Updated: 2026/09/02 15:20:36 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "node.h"
 
-int	ft_lstsize(t_list *lst)
+void	ft_lstadd_top(t_stack *stack, t_node *new)
 {
-	int	i;
-
-	i = 0;
-	while (lst)
-	{
-		lst = lst->next;
-		i++;
-	}
-	return (i);
+	new->next = stack->top;
+	stack->top = new;
+	stack->size += 1;
 }

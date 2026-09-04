@@ -6,19 +6,19 @@
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 21:58:38 by z                 #+#    #+#             */
-/*   Updated: 2026/09/01 21:58:38 by z                ###   ########.fr       */
+/*   Updated: 2026/09/03 03:47:24 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "node.h"
 
-void	ft_lstiter(t_list *lst, void (*f)(void *))
+void	ft_lstiter(t_node *top, void (*f)(void *))
 {
-	if (!lst)
+	if (!top)
 		return ;
-	while (lst)
+	while (top)
 	{
-		f(lst->content);
-		lst = lst->next;
+		f(top->content);
+		top = top->next;
 	}
 }

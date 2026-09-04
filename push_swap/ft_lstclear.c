@@ -1,24 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstlast.c                                       :+:      :+:    :+:   */
+/*   ft_lstclear.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/01 21:46:25 by z                 #+#    #+#             */
-/*   Updated: 2026/09/01 21:47:44 by z                ###   ########.fr       */
+/*   Created: 2026/09/02 15:32:51 by z                 #+#    #+#             */
+/*   Updated: 2026/09/02 15:36:47 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "node.h"
 
-t_list	*ft_lstlast(t_list *lst)
+void	ft_lstclear(t_stack *stack)
 {
-	if (!lst)
-		return (NULL);
-	while (lst->next)
+	t_node	*cleaner;
+	t_node	*temp;
+
+	cleaner = stack->top;
+	while (cleaner)
 	{
-		lst = lst->next;
+		temp = cleaner;
+		cleaner = cleaner->next;
+		free(temp);
 	}
-	return (lst);
+	stack->top = NULL;
+	stack->size = 0;
 }

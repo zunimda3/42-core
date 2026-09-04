@@ -17,9 +17,9 @@ update, but it must not edit this file until the learner approves the exact chan
 ## Current Focus
 
 - **Milestone:** 1 — interface and architecture decisions
-- **Status:** `LEARNING`
-- **Next small step:** draft the confirmed `t_node` and `t_stack` definitions, then
-  check that their fields express the top, size, and ownership invariants.
+- **Status:** `IMPLEMENTING`
+- **Next small step:** identify the minimum caller-owned context fields and explain
+  why each must persist beyond the parser call.
 - **Outstanding team requirement:** the subject requires exactly two learners, but a
   partner has not yet been confirmed; this does not block architecture learning.
 
@@ -45,7 +45,7 @@ Observed on 2026-09-01:
 | # | Milestone | Status | Completion gate |
 | ---: | --- | --- | --- |
 | 0 | Subject and team orientation | `LEARNING` | Learner explains the deliverables, four strategies, disorder regimes, streams, performance gates, and group obligations; partner status is recorded. |
-| 1 | Interface and architecture decisions | `LEARNING` | Top-of-stack invariant, node/data representation, ownership, input/flag grammar, operation-emission contract, and module boundaries are documented and explained. |
+| 1 | Interface and architecture decisions | `IMPLEMENTING` | Top-of-stack invariant, node/data representation, ownership, input/flag grammar, operation-emission contract, and module boundaries are documented and explained. |
 | 2 | Build, parsing, and lifetime | `NOT STARTED` | Required Makefile rules work without relinking; valid inputs build `a`; all invalid-input families print only `Error\n` to stderr; every error path frees memory. |
 | 3 | Operation engine | `NOT STARTED` | All 11 operations pass focused 0/1/2/many-node tests, preserve invariants, emit only allowed stdout lines, and update metrics through one understood contract. |
 | 4 | Disorder, selection, and benchmark foundation | `NOT STARTED` | Disorder is computed before moves; known cases and 0.2/0.5 boundaries pass; default/forced selectors work; benchmark data stays on stderr and operation data stays on stdout. |
@@ -84,7 +84,9 @@ Do not record a design as final merely because an AI suggested it.
 | Decision | Alternatives considered | Rationale and operation bound | Confirmed by |
 | --- | --- | --- | --- |
 | Stack representation | Generic `void *content` nodes vs. project-specific nodes; raw head pointers vs. a stack wrapper | Singly linked `t_node` stores immutable raw value, rank, and `next`; `t_stack` stores `top` and `size`, with the head as top. This gives typed access, one allocation per node, explicit size checks, and simple ownership: every node belongs to exactly one stack and is freed once; pushes transfer nodes without allocating or freeing. Internal list traversal does not itself generate Push_swap operations. | `naamir` |
-| Input and flag grammar | Pending | Pending | Pending |
+| Stack helper interface | Keep generic traversal helpers vs. retain only helpers required by the stack abstraction | Removed `ft_lstlast` and `ft_lstsize`: no current operation requires the former, while the latter would duplicate the authoritative `t_stack.size`. The minimal interface currently contains node creation, add-to-top, and cleanup. | `naamir` |
+| Input and flag grammar | Strict flags-before-integers grammar vs. accepting flags anywhere | Use `push_swap [--bench] [one strategy selector] integers...`: all flags precede the first integer; `--bench` may combine with one selector; repeated flags, conflicting selectors, or a flag after integer parsing begins are invalid; adaptive is the default selector; no arguments print nothing. This is deterministic and keeps parsing state simple. | `naamir` |
+| Parser ownership contract | Parser cleans partial state vs. caller owns one initialized context for the whole run | `main` owns the context and always clears stack `a`; the parser transfers each allocated node immediately into `a`, returns status without printing, and may leave an owned partial stack on failure. `main` performs cleanup and is the single source of `Error\n` output. This keeps allocation ownership and error output centralized. | `naamir` |
 | Simple strategy | Pending | Pending | Pending |
 | Medium strategy | Pending | Pending | Pending |
 | Complex strategy | Pending | Pending | Pending |
@@ -98,14 +100,14 @@ The final `README.md` must contain an accurate human-readable summary for both l
 
 | Learner | Confirmed contributions |
 | --- | --- |
-| `naamir` | Initial linked-list exploration; compared representations and selected a specialized singly linked node plus stack wrapper with explicit ownership invariants |
+| `naamir` | Initial linked-list exploration; compared representations and selected a specialized singly linked node plus stack wrapper with explicit ownership invariants; drafted the specialized types in `node.h`; implemented `ft_lstadd_top` to update both `top` and `size`; initialized new nodes with unassigned rank `-1`; implemented stack cleanup that frees all nodes and resets both invariants; removed redundant traversal helpers to keep `t_stack.size` authoritative; selected the strict flags-before-integers input grammar and caller-owned parser lifetime contract |
 | Partner pending | None yet |
 
 ## Latest Session Handoff
 
-- **Last confirmed achievement:** selected a specialized singly linked `t_node`
-  (`value`, `rank`, `next`) and a `t_stack` wrapper (`top`, `size`), with the list head
-  as the stack top and exclusive node ownership.
+- **Last confirmed achievement:** correctly traced partial-parse cleanup and explained
+  that freeing a node after transferring it into stack `a` would leave `main` to
+  traverse and free the same allocation again.
 - **Open question:** who is the required second learner?
-- **Resume with:** draft the two confirmed type definitions and review their
-  invariants before adding behavior.
+- **Resume with:** teach the difference between transient parser locals and persistent
+  program state, then have the learner propose the minimum context fields.
