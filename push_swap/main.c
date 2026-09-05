@@ -1,20 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstadd_top.c                                    :+:      :+:    :+:   */
+/*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/01 21:37:31 by z                 #+#    #+#             */
-/*   Updated: 2026/09/05 10:39:40 by z                ###   ########.fr       */
+/*   Created: 2026/09/05 09:47:59 by z                 #+#    #+#             */
+/*   Updated: 2026/09/05 10:41:53 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-void	ft_lstadd_top(t_stack *stack, t_node *new)
+int	main(void)
 {
-	new->next = stack->top;
-	stack->top = new;
-	stack->size += 1;
+	t_context	context;
+
+	context_init(&context);
+	ft_lstclear(&context.a);
+	ft_lstclear(&context.b);
+	return (0);
 }

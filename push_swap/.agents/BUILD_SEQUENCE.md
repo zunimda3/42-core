@@ -26,19 +26,68 @@ completion and must not decide unresolved choices for the learners.
 
 ### Slice 1: stabilize the existing stack foundation
 
-Fresh strict-compilation evidence from 2026-09-04:
+The learner removed obsolete `ft_lstiter.c` on 2026-09-05. The retained helpers pass
+strict syntax compilation and Norminette. Focused assertions pass normally and under
+AddressSanitizer/UndefinedBehaviorSanitizer with leak detection disabled;
+LeakSanitizer itself is unavailable under the environment's active tracing.
 
-```text
-ft_lstiter.c:21:22: error: t_node has no member named content
-```
+The learner interpreted the evidence correctly: reset invariants do not alone prove
+that nodes were freed, and LeakSanitizer remains a missing dynamic check. Proceed to
+Slice 2 while retaining that limitation for later memory verification.
 
-`ft_lstiter.c` is a leftover generic-list helper that conflicts with the specialized
-node and is absent from the current header interface. Reconcile it only with explicit
-learner authorization. Then compile and test `ft_lstnew`, `ft_lstadd_top`, and
-`ft_lstclear` on empty, one-node, and multi-node stacks, including sanitizer checks.
+### Active cursor: Slice 2 — minimal build shell
 
-Do not introduce context, parsing, metrics, or strategies before this foundation is
-compiled, tested, and interpreted.
+Have the learner add only a no-output `main` and the required Makefile surface. Gate
+this slice on strict compilation, correct required rules, no-argument silence, and a
+second `make` performing no relink. Do not introduce context or parsing yet.
+
+First attempt evidence: `make` cannot find target `push_swap` because `$NAME` is not
+the Make variable reference `$(NAME)`; `main.c` is absent from `SRCS`; the target
+recipe uses the archiver instead of the compiler/linker; and strict compilation flags
+both unused `main` parameters. Have the learner correct these before retesting.
+
+The learner corrected the Makefile target, source list, and linker recipe. The only
+remaining build failure is the unused `argc`/`argv` pair in the temporary `main`.
+
+The learner changed the temporary entry point to `main(void)`. Fresh build evidence
+passes strict compilation, no-argument stream capture, no-relink behavior, `clean`,
+`fclean`, `re`, and Norminette. The learner interpreted the unchanged binary timestamp
+as evidence that the second successful `make` did not rewrite the target.
+
+### Active cursor: Slice 3 — context initialization/lifetime
+
+Introduce only the confirmed context fields needed before parsing: two empty stacks,
+adaptive-default strategy, benchmark disabled, and initial disorder zero. Defer the
+metrics layout. Resolve the header boundary now that the context depends on stack
+types, then test initialization and cleanup safety before and after partial ownership.
+
+Confirmed revised header boundary: use one project-wide `push_swap.h` containing
+node, stack, strategy, context, and all project prototypes. All sources include it;
+`node.h` is intentionally removed. The learner accepts the broader rebuild dependency
+in exchange for a centralized interface.
+
+Implementation evidence: initialization, cleanup, strict build, Norm, focused field
+assertions, and ASan/UBSan pass with leak detection disabled. The Makefile still
+depends on deleted `node.h`; make therefore selected its built-in compile rule, and
+`main.o` currently lists only `main.c` as a prerequisite. Replace that dependency
+with `push_swap.h` and retest before closing the slice.
+
+The dependency is corrected. Fresh/repeated builds pass, the dependency database
+lists `push_swap.h` for relevant objects, and a temporary-copy timestamp probe rebuilds
+all objects and relinks after the umbrella changes. The learner explained both
+timestamp comparisons. Slice 3 is complete; proceed to Slice 4.
+
+### Active cursor: Slice 4 — integer conversion
+
+Validate and convert one token before allocation. Compare wide accumulation with
+explicit guarding against arbitrarily long input versus per-digit checking against
+the signed-int limit. Gate on signs, zero, `INT_MIN/MAX`, immediate overflow,
+arbitrarily long digit strings, empty/sign-only input, whitespace, and suffixes.
+
+`push_swap.h` now exists with all four namespaced enum choices and the agreed
+non-metrics context fields; standalone strict inclusion and Norminette pass. Context
+initialization is implemented. Make the shared header dependency explicit in the
+build graph before proceeding.
 
 ## Ordered slices
 
@@ -162,7 +211,6 @@ gate passes and both learners can explain and modify the implementation.
 
 ## Deferred decisions
 
-- Disposition of obsolete `ft_lstiter.c` (immediate).
 - Header and Makefile layout.
 - Duplicate-detection and rank-assignment methods.
 - Metrics representation and no-op emission/counting policy.

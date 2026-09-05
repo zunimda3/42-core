@@ -16,11 +16,11 @@ update, but it must not edit this file until the learner approves the exact chan
 
 ## Current Focus
 
-- **Milestone:** 1 — interface and architecture decisions
+- **Milestone:** 2 — build, parsing, and lifetime
 - **Status:** `IMPLEMENTING`
-- **Next small step:** stabilize the earliest implemented stack foundation by
-  reconciling the obsolete generic `ft_lstiter.c`, then compile and test the three
-  specialized stack helpers before designing later components.
+- **Next small step:** design and implement validation/conversion of one integer
+  token before allocation, covering syntax and signed-`int` bounds independently of
+  full argv parsing.
 - **Paused design question:** operation metrics and emission remain undecided until
   the operation engine is the next implementation dependency.
 - **Outstanding team requirement:** the subject requires exactly two learners, but a
@@ -28,19 +28,31 @@ update, but it must not edit this file until the learner approves the exact chan
 
 ## Current Repository Baseline
 
-Observed on 2026-09-04:
+Observed on 2026-09-05:
 
-- Present source work: `node.h`, three specialized stack helpers, and one obsolete
-  generic `ft_lstiter.c`.
-- `node.h` now defines typed `value`, `rank`, and `next` node fields plus a stack
+- Present source work uses `push_swap.h` as a single umbrella plus three specialized
+  stack helpers; the learner removed obsolete `node.h` and `ft_lstiter.c`.
+- The Makefile and temporary `main(void)` now complete the minimal build shell. A
+  fresh strict build, silent no-argument run, no-relink check, required cleanup
+  rules, `re`, and Norminette all produced successful evidence pending learner
+  interpretation before entry in the Verification Matrix.
+- `push_swap.h` intentionally defines the stack, strategy, context, and helper
+  declarations as the project's single umbrella header; all sources include it.
+- `context_init.c` initializes all confirmed fields, and `main` performs safe cleanup.
+  Focused assertions and ASan/UBSan pass with leak detection disabled, pending learner
+  interpretation. The Makefile now tracks `push_swap.h` for every object; a temporary
+  copy confirmed a newer umbrella header rebuilds all objects and relinks.
+- `push_swap.h` defines typed `value`, `rank`, and `next` node fields plus a stack
   wrapper with authoritative `top` and `size`.
-- Missing major deliverables: `main`, parser, operations, strategies, benchmark mode,
+- Missing major deliverables: parser, operations, strategies, benchmark mode,
   Makefile, and README.
 - `cc`, `make`, and `norminette` are available.
 - Valgrind and a checker binary are not currently available; compiler sanitizers can
   provide interim memory diagnostics.
-- Strict syntax-only compilation currently fails because `ft_lstiter.c` still reads
-  the removed generic `content` field.
+- The three retained helpers pass strict syntax-only compilation and Norminette.
+- Focused empty, one-node, and two-node assertion tests pass normally and under
+  AddressSanitizer/UndefinedBehaviorSanitizer with leak detection disabled; this
+  environment cannot run LeakSanitizer under its active tracing mechanism.
 - Existing files are learner work and must not be rewritten or discarded without
   explicit approval.
 
@@ -70,14 +82,14 @@ Evidence should be recorded here only after the learner has seen and understood 
 
 | Area | Minimum scenarios | Evidence |
 | --- | --- | --- |
-| Build | `all`, repeated `all`, `clean`, `fclean`, `re`; required flags | Pending |
+| Build | `all`, repeated `all`, `clean`, `fclean`, `re`; required flags | Minimal shell passes fresh strict build; no-argument run exits 0 with empty stdout/stderr; repeated `make` reports nothing to do and preserves the binary timestamp; `clean` retains only the binary, `fclean` removes it, and `re` rebuilds. Umbrella-header dependencies are explicit; a temporary-copy probe showed a newer header rebuilds every object and then relinks. Learner explained both timestamp comparisons. |
 | Parsing | no args, one integer, signs, `INT_MIN/MAX`, overflow, non-number, empty token, duplicates, invalid/conflicting flags | Pending |
 | Operations | each operation on empty, one-node, two-node, and ordinary stacks; combined-operation semantics | Pending |
 | Disorder | sorted = 0, reverse = 1, known intermediate inputs, fewer than two elements, boundaries 0.2 and 0.5 | Pending |
 | Streams | stdout contains only operations; errors and bench output use stderr; no bench text without `--bench` | Pending |
 | Strategies | every selector on small, sorted, reverse, patterned, and random unique inputs | Pending |
 | Metrics | total equals the sum of all 11 counters and matches stdout operation lines | Pending |
-| Quality | `-Wall -Wextra -Werror`, Norm, sanitizer/Valgrind, no leaks or invalid access | Pending |
+| Quality | `-Wall -Wextra -Werror`, Norm, sanitizer/Valgrind, no leaks or invalid access | Stack foundation and context initializer: strict compilation and Norm pass; focused initialization, empty/one/two-node, partial-ownership, and cleanup assertions pass normally and with ASan/UBSan. Learner explained uninitialized-pointer cleanup risk and that resetting `top`/`size` alone cannot prove nodes were freed. LeakSanitizer remains unavailable, so leak evidence is incomplete. |
 | Performance | repeated random samples of 100 and 500 against pass/good/excellent thresholds | Pending |
 | Defense | each learner explains invariants, algorithms, complexity, ownership, errors, and a small modification | Pending |
 
@@ -94,6 +106,7 @@ Do not record a design as final merely because an AI suggested it.
 | Input node construction order | Insert each argument at the top vs. append each argument at the bottom; parser-local tail vs. persistent stack tail | Chose left-to-right bottom insertion with a parser-local tail so the first integer remains the top of `a`, construction is O(n), and `t_stack` keeps only its existing `top` and `size` invariants. Parser work does not count as generated Push_swap operations. | `naamir` |
 | Persistent run-state organization | One program context vs. separate stack, option, disorder, and metrics objects | Chose one caller-owned context to carry both stacks, the selected strategy, benchmark state, initial disorder, and operation counters across parsing, sorting, reporting, and cleanup. This centralizes lifetime and avoids globals. | `naamir` |
 | Strategy representation | Retain the selector string vs. parse once into an enum | Store a `t_strategy` enum in the context, initialized to adaptive before parsing. Valid selectors replace that value, so sorting happens only after complete successful parsing and can dispatch without repeated string comparisons. | `naamir` |
+| Header boundary | Separate narrow `node.h` beneath `push_swap.h` vs. one project-wide umbrella header | Chose one `push_swap.h` containing node, stack, strategy, context, and all project prototypes; removed `node.h` and made every source include the umbrella. This favors one centralized interface, with the understood consequence that changing it may rebuild every object. | `naamir` |
 | Simple strategy | Pending | Pending | Pending |
 | Medium strategy | Pending | Pending | Pending |
 | Complex strategy | Pending | Pending | Pending |
@@ -107,13 +120,14 @@ The final `README.md` must contain an accurate human-readable summary for both l
 
 | Learner | Confirmed contributions |
 | --- | --- |
-| `naamir` | Initial linked-list exploration; compared representations and selected a specialized singly linked node plus stack wrapper with explicit ownership invariants; drafted the specialized types in `node.h`; implemented `ft_lstadd_top` to update both `top` and `size`; initialized new nodes with unassigned rank `-1`; implemented stack cleanup that frees all nodes and resets both invariants; removed redundant traversal helpers to keep `t_stack.size` authoritative; selected the strict flags-before-integers input grammar, caller-owned parser lifetime contract, O(n) left-to-right bottom insertion using a parser-local non-owning tail, a single caller-owned program context, and an adaptive-default strategy enum; explained that stack `a`, not the local alias, retains ownership after parsing |
+| `naamir` | Initial linked-list exploration; compared representations and selected a specialized singly linked node plus stack wrapper with explicit ownership invariants; drafted the specialized types in `node.h`; implemented `ft_lstadd_top` to update both `top` and `size`; initialized new nodes with unassigned rank `-1`; implemented stack cleanup that frees all nodes and resets both invariants; removed redundant traversal helpers to keep `t_stack.size` authoritative; selected the strict flags-before-integers input grammar, caller-owned parser lifetime contract, O(n) left-to-right bottom insertion using a parser-local non-owning tail, a single caller-owned program context, an adaptive-default strategy enum, and a separate `push_swap.h` program-level header over narrow `node.h`; explained that stack `a`, not the local alias, retains ownership after parsing; implemented and verified the minimal `main.c` and Makefile build shell |
 | Partner pending | None yet |
 
 ## Latest Session Handoff
 
-- **Last confirmed achievement:** changed the working cadence to implement and test
-  each agreed slice before discussing the next unresolved dependency.
+- **Last confirmed achievement:** verified context initialization and the corrected
+  umbrella dependency, explaining the header-to-object and object-to-binary timestamp
+  chain that triggers recompilation and relinking.
 - **Open question:** who is the required second learner?
-- **Resume with:** inspect the `ft_lstiter.c` compile failure, reconcile it with the
-  confirmed minimal specialized helper interface, and rerun strict compilation.
+- **Resume with:** compare safe single-token conversion approaches, choose one, and
+  test exact signed-`int` boundaries before integrating argv or allocations.

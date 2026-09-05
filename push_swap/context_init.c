@@ -1,24 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstiter.c                                       :+:      :+:    :+:   */
+/*   context_init.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/01 21:58:38 by z                 #+#    #+#             */
-/*   Updated: 2026/09/03 03:47:24 by z                ###   ########.fr       */
+/*   Created: 2026/09/05 10:27:54 by z                 #+#    #+#             */
+/*   Updated: 2026/09/05 10:36:18 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "node.h"
+#include "push_swap.h"
 
-void	ft_lstiter(t_node *top, void (*f)(void *))
+void	context_init(t_context *context)
 {
-	if (!top)
-		return ;
-	while (top)
-	{
-		f(top->content);
-		top = top->next;
-	}
+	context->a.top = NULL;
+	context->a.size = 0;
+	context->b.top = NULL;
+	context->b.size = 0;
+	context->strategy = STRATEGY_ADAPTIVE;
+	context->bench_enabled = 0;
+	context->initial_disorder = 0.0;
 }
