@@ -1,38 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memset.c                                        :+:      :+:    :+:   */
+/*   ft_putstr_fd.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/27 17:09:43 by naamir            #+#    #+#             */
-/*   Updated: 2026/08/08 14:49:21 by naamir           ###   ########.fr       */
+/*   Created: 2026/08/02 15:49:50 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/08 15:33:03 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	*ft_memset(void *s, int c, size_t n)
+void	ft_putstr_fd(char *s, int fd)
 {
-	size_t	i;
-	char	*str;
-
-	i = 0;
-	str = (char *)s;
-	while (i < n)
-	{
-		str[i++] = c;
-	}
-	return (str);
+	while (*s)
+		write(fd, (s++), 1);
 }
 
 /*
 int	main(void)
 {
-	char	string[] = "naim";
+	char	str[] = "naim amir";
 
-	printf("Input: naim, Exp. Output: 00im, Result: %s\n",
-		(char *)ft_memset(string, 48, 2));
-	return (0);
+	ft_putstr_fd(str, 1);
 }
 */

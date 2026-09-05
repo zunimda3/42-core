@@ -1,38 +1,38 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memset.c                                        :+:      :+:    :+:   */
+/*   ft_isalnum.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/27 17:09:43 by naamir            #+#    #+#             */
-/*   Updated: 2026/08/08 14:49:21 by naamir           ###   ########.fr       */
+/*   Created: 2026/07/27 16:14:43 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/02 17:02:42 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	*ft_memset(void *s, int c, size_t n)
+int	ft_isalnum(int c)
 {
-	size_t	i;
-	char	*str;
-
-	i = 0;
-	str = (char *)s;
-	while (i < n)
-	{
-		str[i++] = c;
-	}
-	return (str);
+	if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0'
+			&& c <= '9'))
+		return (1);
+	else
+		return (0);
 }
 
 /*
 int	main(void)
 {
-	char	string[] = "naim";
+	char	a;
+	char	zero;
+	char	symbol;
 
-	printf("Input: naim, Exp. Output: 00im, Result: %s\n",
-		(char *)ft_memset(string, 48, 2));
-	return (0);
+	a = 'a';
+	zero = '0';
+	symbol = '^';
+	printf("a = %d\n", ft_isalnum(a));
+	printf("zero = %d\n", ft_isalnum(zero));
+	printf("symbol = %d\n", ft_isalnum(symbol));
 }
 */

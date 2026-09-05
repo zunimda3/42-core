@@ -1,38 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memset.c                                        :+:      :+:    :+:   */
+/*   ft_lstclear.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/27 17:09:43 by naamir            #+#    #+#             */
-/*   Updated: 2026/08/08 14:49:21 by naamir           ###   ########.fr       */
+/*   Created: 2026/08/05 16:04:22 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/05 16:04:23 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	*ft_memset(void *s, int c, size_t n)
+void	ft_lstclear(t_list **lst, void (*del)(void *))
 {
-	size_t	i;
-	char	*str;
+	t_list	*cleaner;
+	t_list	*temp;
 
-	i = 0;
-	str = (char *)s;
-	while (i < n)
+	if (!lst || !del)
+		return ;
+	cleaner = *lst;
+	while (cleaner)
 	{
-		str[i++] = c;
+		temp = cleaner;
+		cleaner = cleaner->next;
+		del(temp->content);
+		free(temp);
 	}
-	return (str);
+	*lst = NULL;
 }
-
-/*
-int	main(void)
-{
-	char	string[] = "naim";
-
-	printf("Input: naim, Exp. Output: 00im, Result: %s\n",
-		(char *)ft_memset(string, 48, 2));
-	return (0);
-}
-*/

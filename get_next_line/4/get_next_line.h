@@ -1,38 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memset.c                                        :+:      :+:    :+:   */
+/*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/27 17:09:43 by naamir            #+#    #+#             */
-/*   Updated: 2026/08/08 14:49:21 by naamir           ###   ########.fr       */
+/*   Created: 2026/08/29 13:20:42 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/29 13:58:09 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#ifndef GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
 
-void	*ft_memset(void *s, int c, size_t n)
-{
-	size_t	i;
-	char	*str;
+# include <stdlib.h>
+# include <unistd.h>
 
-	i = 0;
-	str = (char *)s;
-	while (i < n)
-	{
-		str[i++] = c;
-	}
-	return (str);
-}
+char	*ft_strchr(char *saved, char c);
+char	*ft_substr(char *saved, size_t len);
+char	*ft_strjoin(char *saved, char *chunk);
+ssize_t	read_line(char **saved, char *chunk, int fd);
+char	*extract_line(char **saved, char *chunk);
+char	*get_next_line(int fd);
 
-/*
-int	main(void)
-{
-	char	string[] = "naim";
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 10
+# endif
 
-	printf("Input: naim, Exp. Output: 00im, Result: %s\n",
-		(char *)ft_memset(string, 48, 2));
-	return (0);
-}
-*/
+#endif

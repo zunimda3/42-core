@@ -1,14 +1,33 @@
-#include <stddef.h>
-#include <stdio.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_strlen.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/27 16:42:49 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/02 17:02:42 by naamir           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-size_t ft_strlen(const char *s) {
-  size_t i = 0;
-  while (s[i])
-    i++;
-  return i;
+#include "libft.h"
+
+size_t	ft_strlen(const char *c)
+{
+	size_t	i;
+
+	i = 0;
+	while (c[i])
+		i++;
+	return (i);
 }
 
-int main(void) {
-  char *str = "naim";
-  printf("%zu\n", ft_strlen(str));
+/*
+int	main(void)
+{
+	char	*str;
+
+	str = "naim amir";
+	printf("len of (naim amir (9)) = %zu\n", ft_strlen(str));
 }
+*/

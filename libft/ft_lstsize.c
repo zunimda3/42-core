@@ -1,38 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memset.c                                        :+:      :+:    :+:   */
+/*   ft_lstsize.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/27 17:09:43 by naamir            #+#    #+#             */
-/*   Updated: 2026/08/08 14:49:21 by naamir           ###   ########.fr       */
+/*   Created: 2026/08/05 15:16:47 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/05 15:33:09 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	*ft_memset(void *s, int c, size_t n)
+int	ft_lstsize(t_list *lst)
 {
-	size_t	i;
-	char	*str;
+	int	count;
 
-	i = 0;
-	str = (char *)s;
-	while (i < n)
+	count = 0;
+	while (lst)
 	{
-		str[i++] = c;
+		count++;
+		lst = lst->next;
 	}
-	return (str);
+	return (count);
 }
-
-/*
-int	main(void)
-{
-	char	string[] = "naim";
-
-	printf("Input: naim, Exp. Output: 00im, Result: %s\n",
-		(char *)ft_memset(string, 48, 2));
-	return (0);
-}
-*/

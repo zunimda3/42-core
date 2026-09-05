@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strdup.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
+/*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/31 21:39:44 by z                 #+#    #+#             */
-/*   Updated: 2026/07/31 21:40:05 by z                ###   ########.fr       */
+/*   Created: 2026/08/08 15:28:28 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/08 15:28:28 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
+#include "libft.h"
 
 char	*ft_strdup(const char *s)
 {
@@ -33,3 +33,18 @@ char	*ft_strdup(const char *s)
 	res[i] = 0;
 	return (res);
 }
+
+/*
+int	main(void)
+{
+	char	*res;
+	char	str[] = "naim amir";
+
+	res = ft_strdup(str);
+	if (!res)
+		return (1);
+	printf("str: %s, result: %s\n", str, res);
+	free(res);
+	return (0);
+}
+*/

@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strjoin.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
+/*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/31 22:22:31 by z                 #+#    #+#             */
-/*   Updated: 2026/07/31 22:32:27 by z                ###   ########.fr       */
+/*   Created: 2026/08/08 15:28:37 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/08 15:28:37 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "libft.h"
 
 char	*ft_strjoin(char const *s1, char const *s2)
 {
@@ -23,18 +21,19 @@ char	*ft_strjoin(char const *s1, char const *s2)
 
 	if (!s1 || !s2)
 		return (NULL);
-	lens1 = strlen(s1);
-	lens2 = strlen(s2);
+	lens1 = ft_strlen(s1);
+	lens2 = ft_strlen(s2);
 	size = lens1 + lens2 + 1;
 	res = malloc(size * sizeof(char));
 	if (!res)
 		return (NULL);
-	memcpy(res, s1, lens1);
-	memcpy(res + lens1, s2, lens2);
+	ft_memcpy(res, s1, lens1);
+	ft_memcpy(res + lens1, s2, lens2);
 	res[lens1 + lens2] = 0;
 	return (res);
 }
 
+/*
 int	main(void)
 {
 	char	s1[] = "naim ";
@@ -43,3 +42,4 @@ int	main(void)
 	printf("s1: %s, s2: %s\n", s1, s2);
 	printf("result: %s\n", ft_strjoin(s1, s2));
 }
+*/

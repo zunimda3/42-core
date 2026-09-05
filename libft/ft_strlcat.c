@@ -3,31 +3,47 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strlcat.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
+/*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/20 11:04:28 by z                 #+#    #+#             */
-/*   Updated: 2026/07/21 21:05:03 by z                ###   ########.fr       */
+/*   Created: 2026/07/29 15:57:48 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/02 17:02:42 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stddef.h>
+#include "libft.h"
 
-size_t	ft_strlcat(char *dst, const char *src, size_t dstsize)
+size_t	ft_strlcat(char *dst, const char *src, size_t size)
 {
+	size_t	lend;
+	size_t	lens;
 	size_t	i;
-	size_t	j;
 
+	lend = 0;
+	while (lend < size && dst[lend])
+		lend++;
+	lens = 0;
+	while (src[lens])
+		lens++;
+	if (lend == size || size == 0)
+		return (size + lens);
 	i = 0;
-	while (i < dstsize && dst[i])
+	while (i < size - lend - 1 && src[i])
 	{
+		dst[lend + i] = src[i];
 		i++;
 	}
-	j = 0;
-	while ((i + j) < dstsize && src[j])
-	{
-		dst[i] = src[j];
-		i++;
-		j++;
-	}
-	return (i + j);
+	dst[lend + i] = '\0';
+	return (lend + lens);
 }
+
+/*
+int	main(void)
+{
+	char	destination[] = "nama saya:";
+	char	source[] = "naim";
+
+	printf("before\nsource: %s, destination: %s\n", source, destination);
+	printf("return value: %zu\n", ft_strlcat(destination, source, 15));
+	printf("updated destination: %s\n", destination);
+}
+*/

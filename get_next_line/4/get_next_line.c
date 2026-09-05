@@ -1,43 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_calloc.c                                        :+:      :+:    :+:   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/08/08 15:28:15 by naamir            #+#    #+#             */
-/*   Updated: 2026/08/08 15:28:15 by naamir           ###   ########.fr       */
+/*   Created: 2026/08/29 13:19:25 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/29 13:56:38 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "get_next_line.h"
 
-void	*ft_calloc(size_t nmemb, size_t size)
+char	*get_next_line(int fd)
 {
-	size_t	i;
-	char	*res;
+	char		*chunk;
+	char static	*saved;
+	ssize_t		bytes_read;
 
-	if (nmemb != 0 && size > (SIZE_MAX / nmemb))
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	res = malloc(nmemb * size);
-	if (!res)
+	chunk = malloc(BUFFER_SIZE + 1);
+	if (!chunk)
 		return (NULL);
-	i = 0;
-	while (i < (nmemb * size))
-		res[i++] = 0;
-	return (res);
+	chunk[BUFFER_SIZE] = '\0';
+	bytes_read = 1;
+	while (!ft_strchr(saved, '\n') && bytes_read > 0)
+	{
+		bytes_read = read_line(&saved, chunk, fd);
+		if (bytes_read < 0)
+			return (free(saved), free(chunk), saved = NULL, NULL);
+	}
+	return (extract_line());
 }
-
-/*
-int	main(void)
-{
-	int	*res;
-
-	res = ft_calloc(4, sizeof(int));
-	if (!res)
-		return (1);
-	printf("%d %d %d %d\n", res[0], res[1], res[2], res[3]);
-	free(res);
-	return (0);
-}
-*/

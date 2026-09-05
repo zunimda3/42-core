@@ -1,29 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memset.c                                        :+:      :+:    :+:   */
+/*   ft_bzero.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/27 17:09:43 by naamir            #+#    #+#             */
-/*   Updated: 2026/08/08 14:49:21 by naamir           ###   ########.fr       */
+/*   Created: 2026/07/27 17:24:08 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/08 14:48:25 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	*ft_memset(void *s, int c, size_t n)
+void	ft_bzero(void *s, size_t n)
 {
-	size_t	i;
 	char	*str;
+	size_t	i;
 
-	i = 0;
 	str = (char *)s;
+	i = 0;
 	while (i < n)
 	{
-		str[i++] = c;
+		str[i++] = 0;
 	}
-	return (str);
 }
 
 /*
@@ -31,8 +30,8 @@ int	main(void)
 {
 	char	string[] = "naim";
 
-	printf("Input: naim, Exp. Output: 00im, Result: %s\n",
-		(char *)ft_memset(string, 48, 2));
+	ft_bzero((string + 2), 2);
+	printf("Input: naim (-2), Exp. Output: na, Result: %s\n", string);
 	return (0);
 }
 */

@@ -1,38 +1,45 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memset.c                                        :+:      :+:    :+:   */
+/*   ft_atoi.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/27 17:09:43 by naamir            #+#    #+#             */
-/*   Updated: 2026/08/08 14:49:21 by naamir           ###   ########.fr       */
+/*   Created: 2026/07/30 18:12:28 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/08 20:13:59 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	*ft_memset(void *s, int c, size_t n)
+int	ft_atoi(const char *nptr)
 {
-	size_t	i;
-	char	*str;
+	int	sign;
+	int	sum;
 
-	i = 0;
-	str = (char *)s;
-	while (i < n)
+	sign = 1;
+	sum = 0;
+	while (*nptr == ' ' || (*nptr >= 9 && *nptr <= 13))
+		nptr++;
+	if (*nptr == '+' || *nptr == '-')
 	{
-		str[i++] = c;
+		if (*nptr == '-')
+			sign *= -1;
+		nptr++;
 	}
-	return (str);
+	while (*nptr >= '0' && *nptr <= '9')
+	{
+		sum = (sum * 10) + (*nptr - '0');
+		nptr++;
+	}
+	return (sum * sign);
 }
 
 /*
 int	main(void)
 {
-	char	string[] = "naim";
+	char	str[] = "		-+-1000";
 
-	printf("Input: naim, Exp. Output: 00im, Result: %s\n",
-		(char *)ft_memset(string, 48, 2));
-	return (0);
+	printf("%d\n", ft_atoi(str));
 }
 */

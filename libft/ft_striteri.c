@@ -1,38 +1,46 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memset.c                                        :+:      :+:    :+:   */
+/*   ft_striteri.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/27 17:09:43 by naamir            #+#    #+#             */
-/*   Updated: 2026/08/08 14:49:21 by naamir           ###   ########.fr       */
+/*   Created: 2026/08/02 15:11:16 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/08 14:59:24 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-void	*ft_memset(void *s, int c, size_t n)
+// #include <stdio.h>
+// void	n_toupper(unsigned int i, char *str)
+// {
+// 	(void)i;
+// 	if (*str >= 'a' && *str <= 'z')
+// 		*str = *str - 32;
+// }
+
+void	ft_striteri(char *s, void (*f)(unsigned int, char *))
 {
-	size_t	i;
-	char	*str;
+	unsigned int	i;
 
 	i = 0;
-	str = (char *)s;
-	while (i < n)
+	if (!s || !f)
+		return ;
+	while (s[i])
 	{
-		str[i++] = c;
+		f(i, &s[i]);
+		i++;
 	}
-	return (str);
 }
 
 /*
 int	main(void)
 {
-	char	string[] = "naim";
+	char	str[] = "NaiM AmiR";
 
-	printf("Input: naim, Exp. Output: 00im, Result: %s\n",
-		(char *)ft_memset(string, 48, 2));
-	return (0);
+	printf("Before: %s\n", str);
+	ft_striteri(str, n_toupper);
+	printf("After: %s\n", str);
 }
 */
