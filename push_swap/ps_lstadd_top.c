@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstadd_top.c                                    :+:      :+:    :+:   */
+/*   ps_lstadd_top.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 21:37:31 by z                 #+#    #+#             */
-/*   Updated: 2026/09/05 10:39:40 by z                ###   ########.fr       */
+/*   Updated: 2026/09/05 13:42:35 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-void	ft_lstadd_top(t_stack *stack, t_node *new)
+void	ps_lstadd_top(t_stack *stack, t_node *new)
 {
 	new->next = stack->top;
 	stack->top = new;

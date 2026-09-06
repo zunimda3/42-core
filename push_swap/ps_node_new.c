@@ -1,35 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   ps_node_new.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/05 09:47:59 by z                 #+#    #+#             */
-/*   Updated: 2026/09/06 16:07:17 by naamir           ###   ########.fr       */
+/*   Created: 2026/09/01 21:32:06 by z                 #+#    #+#             */
+/*   Updated: 2026/09/05 13:48:03 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-int	main(int argc, char **argv)
+t_node	*ps_node_new(int value)
 {
-	t_context	context;
-	int			ok;
-	int			start;
+	t_node	*new;
 
-	context_init(&context);
-	ok = 1;
-	start = 1;
-	if (argc > 1)
-	{
-		ok = parse_flags(&context, argc, argv, &start);
-		if (ok && start < argc)
-			ok = parse_numbers(&context, argc, argv, start);
-	}
-	if (!ok)
-		write(2, "Error\n", 6);
-	ps_lstclear(&context.a);
-	ps_lstclear(&context.b);
-	return (0);
+	new = malloc(sizeof(t_node));
+	if (!new)
+		return (NULL);
+	new->value = value;
+	new->next = NULL;
+	new->rank = -1;
+	return (new);
 }

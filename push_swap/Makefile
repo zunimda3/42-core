@@ -1,16 +1,26 @@
+LIBFT_DIR = libft
+LIBFT = $(LIBFT_DIR)/libft.a
+
 NAME = push_swap
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
-SRCS = ft_lstadd_top.c \
-	   ft_lstclear.c \
-	   ft_lstnew.c \
+CPPFLAGS = -I. -Ilibft
+SRCS = ps_lstadd_top.c \
+	   ps_lstclear.c \
+	   ps_node_new.c \
 	   context_init.c \
+	   parser.c \
+	   parse_flags.c \
 	   main.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)
-$(NAME): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+
+$(LIBFT):
+	$(MAKE) -C $(LIBFT_DIR)
+
+$(NAME): $(OBJS) $(LIBFT)
+	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
 %.o: %.c push_swap.h
 	$(CC) $(CFLAGS) -c $< -o $@
 

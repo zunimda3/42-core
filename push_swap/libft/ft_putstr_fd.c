@@ -1,26 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstnew.c                                        :+:      :+:    :+:   */
+/*   ft_putstr_fd.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
+/*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/01 21:32:06 by z                 #+#    #+#             */
-/*   Updated: 2026/09/05 10:39:53 by z                ###   ########.fr       */
+/*   Created: 2026/08/02 15:49:50 by naamir            #+#    #+#             */
+/*   Updated: 2026/08/08 15:33:03 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "push_swap.h"
+#include "libft.h"
 
-t_node	*ft_lstnew(int value)
+void	ft_putstr_fd(char *s, int fd)
 {
-	t_node	*new;
-
-	new = malloc(sizeof(t_node));
-	if (!new)
-		return (NULL);
-	new->value = value;
-	new->next = NULL;
-	new->rank = -1;
-	return (new);
+	while (*s)
+		write(fd, (s++), 1);
 }
+
+/*
+int	main(void)
+{
+	char	str[] = "naim amir";
+
+	ft_putstr_fd(str, 1);
+}
+*/

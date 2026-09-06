@@ -12,6 +12,8 @@ completion and must not decide unresolved choices for the learners.
 - `t_stack.top` is the stack top; `t_stack.size` is authoritative.
 - Nodes belong to exactly one stack and are freed once. Pushes transfer ownership.
 - Retain only helpers required by the specialized stack abstraction.
+- Prefix specialized stack helpers with `ps_` so their `t_node`/`t_stack` API can
+  coexist with libft's generic `ft_lst*` symbols.
 - Flags precede integers. One selector may combine with `--bench`; repeats,
   conflicts, unknown flags, and flags after integers are invalid.
 - Adaptive is the default strategy.
@@ -20,6 +22,16 @@ completion and must not decide unresolved choices for the learners.
 - Build `a` left-to-right using a parser-local non-owning tail so argv order remains
   stack order in O(n) ordinary C work.
 - Strategy is stored as an adaptive-default enum.
+- Flag phase: only exact `--bench`/`--simple`/`--medium`/`--complex`/`--adaptive`
+  tokens are flags; the first non-exact token ends the phase, so later
+  flag-looking strings are invalid integers. Bench and one selector are
+  order-independent within the phase; repeats and conflicts are invalid. Flags
+  with no following integers print nothing, like no parameters.
+- Duplicates are rejected by walking the already-attached nodes of stack `a`
+  before allocation: O(n²) worst-case comparisons, no extra allocation; array
+  reuse is revisited only if rank assignment justifies one.
+- Overflow-safe conversion is parked by learner choice; it remains a required
+  parsing gate before milestone 2 can verify.
 - Metrics layout, operation emission policy, rank method, and algorithms are open.
 
 ## Active cursor
@@ -84,10 +96,78 @@ explicit guarding against arbitrarily long input versus per-digit checking again
 the signed-int limit. Gate on signs, zero, `INT_MIN/MAX`, immediate overflow,
 arbitrarily long digit strings, empty/sign-only input, whitespace, and suffixes.
 
+The learner copied libft into the project and renamed the specialized helper
+declarations, definitions, filenames, and `main` calls with a `ps_` prefix. The root
+Makefile creates `libft/libft.a` through its sub-Makefile, preserves its timestamp on
+a repeated isolated invocation, and links it after the project objects in a strict
+successful build. Cleanup forwarding remains unfinished. The focused 12-case
+`is_valid_int` syntax suite now passes ordinary signed digits, empty, sign-only,
+whitespace, suffix, and repeated-sign cases; strict build and Norm also pass. Add
+overflow-safe conversion and exact signed-int boundary tests next.
+
+The learner explicitly chose a build-first detour on 2026-09-05: construct stack `a`
+for ordinary unique in-range numeric argv before hardening overflow and other edge
+cases. Restore the current header/definition mismatch for `is_valid_int`, then move
+temporarily to Slice 5 with no flags and controlled in-range inputs. Return to Slice
+4 range safety and Slice 6 error/flag barriers before parsing can be verified.
+
+After considering refactoring risk, the learner confirmed this order: make the
+numeric builder return status and preserve caller-owned cleanup now; harden range and
+duplicates before leaving numeric parsing; defer flag recognition until afterward.
+Give the numeric builder a starting argv index so flags can later select where
+numbers begin without rewriting stack construction. Implement and test this builder
+in isolation before changing `main`.
+
+The learner began `parse_numbers` in `parser.c` and correctly passes `t_context *ctx`,
+which already provides stack `a` as `ctx->a`. The unfinished slice must use a local
+tail rather than `ps_lstadd_top`, preserve the caller-supplied `start`, loop with
+`start < argc`, advance the index, update `a.size` once per attached node, and return
+success after the loop.
+
 `push_swap.h` now exists with all four namespaced enum choices and the agreed
 non-metrics context fields; standalone strict inclusion and Norminette pass. Context
 initialization is implemented. Make the shared header dependency explicit in the
 build graph before proceeding.
+
+### Active cursor: Slice 5 — numeric stack construction (implemented)
+
+`parse_numbers` builds `a` left-to-right with a parser-local non-owning tail: the
+first node sets `a.top`, later nodes link through `tail->next`, `tail` and
+`start` advance every pass, and `a.size` grows once per attached node. It returns
+0 on an invalid token or allocation failure and 1 on success, without printing.
+An isolated five-scenario suite passes strictly and under ASan/UBSan: order
+preservation with the first integer on top, mid-stream failure leaving an owned
+size-2 partial stack that `main`'s `ps_lstclear` frees, single element, immediate
+failure with an empty `a`, and starting-index selection. `main(int, char **)`
+always initializes, parses only when `argc > 1`, prints `Error\n` to stderr as
+the single error source, cleans up on every path, and stays silent for no
+arguments. Strict build, no-relink, and Norminette pass.
+
+Duplicate detection implemented and verified (2026-09-06): `validated_node`
+walks `a`'s attached nodes before each allocation and returns NULL on a value
+match, so the duplicate is rejected before its node exists and cleanup paths
+stay unchanged. `parse_numbers` attaches only validated nodes. The duplicate
+family passes through the real binary (mid-stream, front, end, adjacent,
+zero) with `Error\n` on stderr and silent controls. A Norm-forced refactor
+split `validated_node` out of `parse_numbers`.
+
+### Active cursor: Slice 6 — flags and complete-input barrier (implemented)
+
+`parse_flags.c` (prototype in `push_swap.h`, object in the root Makefile)
+consumes exact `--bench`/selector tokens before the first non-flag token,
+records the first-integer index into `int *start`, and rejects repeated
+`--bench`, conflicting selectors, and flag-looking tokens after the numeric
+boundary via `flag_type` dispatch into a bench/selector `set_flag`. `main`
+calls `parse_flags` then `parse_numbers` only when `start < argc`, so
+flags-only runs stay silent. A Norm-forced refactor extracted `flag_type`;
+`parse_flags` is 22 lines and Norm-OK. Full stream matrix passes: valid
+flag+integer combinations in both orders are silent, invalid and conflicting
+runs print exactly `Error\n` on stderr with exit 0. Learner debugged the
+`&start` pointer pass and the bench/selector guard conflation via the matrix.
+
+Next dependency: the overflow-safe conversion (Slice 4 remainder) replacing
+unguarded `ft_atoi` in `validated_node` — the sole open numeric-parsing row —
+then rank assignment (Slice 7) or the operation engine, per learner choice.
 
 ## Ordered slices
 

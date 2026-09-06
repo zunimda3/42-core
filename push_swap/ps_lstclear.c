@@ -1,35 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   ps_lstclear.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/05 09:47:59 by z                 #+#    #+#             */
-/*   Updated: 2026/09/06 16:07:17 by naamir           ###   ########.fr       */
+/*   Created: 2026/09/02 15:32:51 by z                 #+#    #+#             */
+/*   Updated: 2026/09/05 13:42:18 by naamir           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-int	main(int argc, char **argv)
+void	ps_lstclear(t_stack *stack)
 {
-	t_context	context;
-	int			ok;
-	int			start;
+	t_node	*cleaner;
+	t_node	*temp;
 
-	context_init(&context);
-	ok = 1;
-	start = 1;
-	if (argc > 1)
+	cleaner = stack->top;
+	while (cleaner)
 	{
-		ok = parse_flags(&context, argc, argv, &start);
-		if (ok && start < argc)
-			ok = parse_numbers(&context, argc, argv, start);
+		temp = cleaner;
+		cleaner = cleaner->next;
+		free(temp);
 	}
-	if (!ok)
-		write(2, "Error\n", 6);
-	ps_lstclear(&context.a);
-	ps_lstclear(&context.b);
-	return (0);
+	stack->top = NULL;
+	stack->size = 0;
 }
