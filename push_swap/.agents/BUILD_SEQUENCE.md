@@ -34,6 +34,8 @@ completion and must not decide unresolved choices for the learners.
   syntax validation. Per-digit checking selects `INT_MAX` or the magnitude of
   `INT_MIN` before multiplication; the learner traced the sign, limit, and
   final-digit rejection.
+- Rank assignment uses count-smaller traversal: O(n²) C comparisons, O(1) auxiliary
+  space, no allocation/failure path, and exactly zero generated operations.
 - Metrics layout, operation emission policy, rank method, and algorithms are open.
 
 ## Active cursor
@@ -273,6 +275,16 @@ stderr and clears all owned nodes. Capture stdout and stderr separately.
 Compare: count-smaller O(n²) with no array; copy/sort/map O(n log n) with O(n) space;
 or linked merge machinery with more pointer complexity. Ranking emits no Push_swap
 operations. Gate: ranks are unique/contiguous and values/order remain unchanged.
+
+Learner chose count-smaller after correctly tracing mixed zero-based ranks. Build a
+narrow no-allocation function: for each outer node, scan all nodes and assign the
+number of smaller values. Test empty, single, sorted, reverse, and mixed cases while
+asserting values, links, order, and authoritative size are unchanged.
+
+The learner selected `void assign_ranks(t_stack *stack)` rather than a context
+parameter because the function needs only one stack's nodes. Add only this function,
+its umbrella declaration, and its build source before isolated tests; integrate the
+call only after the focused invariant gate passes.
 
 ### 8. Primitive mutations
 

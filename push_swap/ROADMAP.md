@@ -18,9 +18,9 @@ update, but it must not edit this file until the learner approves the exact chan
 
 - **Milestone:** 2 — build, parsing, and lifetime
 - **Status:** `VERIFYING`
-- **Next small step:** compare rank-assignment techniques and choose the smallest
-  defensible implementation slice. Milestone 2's implemented gates pass; it remains
-  `VERIFYING` because LeakSanitizer/Valgrind evidence is still unavailable.
+- **Next small step:** implement the chosen count-smaller rank assignment as a
+  focused no-allocation slice, then assert contiguous ranks while preserving values,
+  links, order, and size. Milestone 2 remains `VERIFYING` only for memory tooling.
 - **Paused design question:** operation metrics and emission remain undecided until
   the operation engine is the next implementation dependency.
 - **Outstanding team requirement:** the subject requires exactly two learners, but a
@@ -132,6 +132,7 @@ Do not record a design as final merely because an AI suggested it.
 | Flag-phase boundary | Flag-looking tokens after numbers begin treated as invalid integers vs. special-cased anywhere | The flag phase consumes only exact `--bench`/`--simple`/`--medium`/`--complex`/`--adaptive` tokens; the first token that is not one of those exact strings ends the phase, so a later `--bench` after numbers begin is rejected as an invalid integer. `--bench` and one selector may appear in either order before the first integer; repeats and conflicts are invalid. This keeps one deterministic boundary and needs no lookahead. A run whose tokens are only
 flags, with no integers following, prints nothing like a no-parameter run;
 this is a learner-confirmed reading of the subject's unspecified corner. | `naamir` |
+| Rank assignment | Count-smaller traversal vs. copy-sort-map array; narrow `t_stack *` vs. whole `t_context *` interface | Chose count-smaller: each node's rank is the number of smaller values. It is O(n²) C comparisons, O(1) auxiliary space, requires no allocation or failure cleanup, preserves values/link order, and generates exactly zero Push_swap operations. Chose `void assign_ranks(t_stack *stack)` because ranking needs only one stack's nodes, not options or the other stack. The learner prioritized simplicity because ranking work does not count toward emitted-operation thresholds, while acknowledging ordinary runtime still exists. | `naamir` |
 | Simple strategy | Pending | Pending | Pending |
 | Medium strategy | Pending | Pending | Pending |
 | Complex strategy | Pending | Pending | Pending |
@@ -170,7 +171,10 @@ isolated flag contract now pass; explained that repeated benchmark is rejected b
 `set_flag` setting status to zero when `bench_enabled` is already true; distinguished
 `clean` (remove root/libft objects, retain final targets) from `fclean` (also remove
 `push_swap` and `libft.a`); implemented root cleanup delegation to libft, with the
-full artifact-state, `re`, no-relink, Norm, and parser smoke checks passing |
+full artifact-state, `re`, no-relink, Norm, and parser smoke checks passing; traced
+zero-based ranks correctly and selected count-smaller rank assignment for its
+no-allocation simplicity and zero generated-operation cost; selected a narrow
+`t_stack *` interface because ranking needs only one stack's nodes |
 | Partner pending | None yet |
 
 ## Latest Session Handoff
@@ -201,7 +205,10 @@ full artifact-state, `re`, no-relink, Norm, and parser smoke checks passing |
 - **Latest build evidence:** root `clean`/`fclean` now delegate to libft. From a full
   build, artifact-state checks confirm the intended clean/fclean distinction; `re`,
   strict compilation, full Norm, parser smoke checks, and no-relink all pass.
+- **Latest design choice:** count-smaller rank assignment, O(n²) C work and O(1)
+  auxiliary space, with values/order unchanged and zero generated operations;
+  `assign_ranks` takes only the `t_stack *` it actually needs.
 - **Open question:** who is the required second learner?
-- **Resume with:** compare count-smaller O(n²)/O(1) auxiliary space against
-  copy-sort-map O(n log n)/O(n) auxiliary space for rank assignment, then choose
-  and build only that slice.
+- **Resume with:** use one outer node and one full-stack scan per node; assign the
+  count of smaller values to `rank`, then test empty, single, sorted, reverse, and
+  mixed stacks without changing values, links, order, or size.
