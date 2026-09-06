@@ -6,11 +6,12 @@
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/05 13:34:09 by naamir            #+#    #+#             */
-/*   Updated: 2026/09/06 12:56:06 by naamir           ###   ########.fr       */
+/*   Updated: 2026/09/06 18:59:33 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
+#include <limits.h>
 
 int	is_valid_int(const char *str)
 {
@@ -28,6 +29,32 @@ int	is_valid_int(const char *str)
 			return (0);
 		str++;
 	}
+	return (1);
+}
+
+static int	convert_int(const char *str, int *result)
+{
+	long long	value;
+	long long	limit;
+	int			sign;
+
+	sign = 1;
+	if (*str == '-')
+		sign = -1;
+	if (*str == '-' || *str == '+')
+		str++;
+	limit = INT_MAX;
+	if (sign == -1)
+		limit = -(long long)INT_MIN;
+	value = 0;
+	while (*str)
+	{
+		if (value > (limit - (*str - '0')) / 10)
+			return (0);
+		value = value * 10 + (*str - '0');
+		str++;
+	}
+	*result = (int)(value * sign);
 	return (1);
 }
 
@@ -50,9 +77,8 @@ static t_node	*validated_node(t_context *ctx, char *str)
 	int		num;
 	t_node	*new;
 
-	if (!is_valid_int(str))
+	if (!is_valid_int(str) || !convert_int(str, &num))
 		return (NULL);
-	num = ft_atoi(str);
 	if (!is_in_a(ctx, num))
 		return (NULL);
 	new = ps_node_new(num);

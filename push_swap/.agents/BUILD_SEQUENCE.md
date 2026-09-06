@@ -30,8 +30,10 @@ completion and must not decide unresolved choices for the learners.
 - Duplicates are rejected by walking the already-attached nodes of stack `a`
   before allocation: O(n²) worst-case comparisons, no extra allocation; array
   reuse is revisited only if rank assignment justifies one.
-- Overflow-safe conversion is parked by learner choice; it remains a required
-  parsing gate before milestone 2 can verify.
+- Exact conversion uses a guarded positive magnitude in `long long`, with separate
+  syntax validation. Per-digit checking selects `INT_MAX` or the magnitude of
+  `INT_MIN` before multiplication; the learner traced the sign, limit, and
+  final-digit rejection.
 - Metrics layout, operation emission policy, rank method, and algorithms are open.
 
 ## Active cursor
@@ -129,6 +131,14 @@ non-metrics context fields; standalone strict inclusion and Norminette pass. Con
 initialization is implemented. Make the shared header dependency explicit in the
 build graph before proceeding.
 
+On 2026-09-06 the learner selected guarded positive-magnitude `long long`
+accumulation over negative `int` accumulation for readability and explicitly
+requested the AI-authored rewrite. Strict build and Norm pass; an ASan/UBSan
+assertion harness confirms exact `INT_MIN`, `INT_MAX`, and zero values, while stream
+tests reject immediate and arbitrarily long overflow with exact stderr and retain
+duplicate/syntax behavior. The learner interpreted the evidence by explaining that
+the final digit is rejected before its addition would cross the selected limit.
+
 ### Active cursor: Slice 5 — numeric stack construction (implemented)
 
 `parse_numbers` builds `a` left-to-right with a parser-local non-owning tail: the
@@ -151,7 +161,7 @@ family passes through the real binary (mid-stream, front, end, adjacent,
 zero) with `Error\n` on stderr and silent controls. A Norm-forced refactor
 split `validated_node` out of `parse_numbers`.
 
-### Active cursor: Slice 6 — flags and complete-input barrier (implemented)
+### Slice 6 — flags and complete-input barrier (focused gate complete)
 
 `parse_flags.c` (prototype in `push_swap.h`, object in the root Makefile)
 consumes exact `--bench`/selector tokens before the first non-flag token,
@@ -165,9 +175,52 @@ flag+integer combinations in both orders are silent, invalid and conflicting
 runs print exactly `Error\n` on stderr with exit 0. Learner debugged the
 `&start` pointer pass and the bench/selector guard conflation via the matrix.
 
-Next dependency: the overflow-safe conversion (Slice 4 remainder) replacing
-unguarded `ft_atoi` in `validated_node` — the sole open numeric-parsing row —
-then rank assignment (Slice 7) or the operation engine, per learner choice.
+Fresh walkthrough evidence on 2026-09-06 exposes an asymmetric selector bug:
+`--adaptive --adaptive` and `--adaptive --simple` are accepted, while the reverse
+conflict is rejected. `set_flag` uses `STRATEGY_ADAPTIVE` both as the default value
+and as evidence that no selector has appeared, so explicit adaptive cannot be
+distinguished from the default. The learner traced that state sequence correctly.
+Restore an explicit selector-seen invariant before closing parsing; then finish
+root/libft cleanup integration before rank assignment.
+
+First learner implementation adds local `selector_seen` but sets and checks it for
+every recognized flag. Strict build and Norm pass; all selector conflicts now reject
+externally, but valid `--bench --simple`, `--simple --bench`, and
+`--adaptive --bench` fail because benchmark type 0 incorrectly consumes selector
+state. Restrict selector-seen logic to types 1..4, retain `set_flag`'s independent
+repeated-bench handling, and rerun the symmetric matrix. Learner interpretation of
+this first-attempt evidence is pending.
+
+Second learner attempt changes the conflict check to `type && selector_seen`, so
+selector-first benchmark combinations pass. The following assignment remains
+unconditional, however, so benchmark-first selector combinations still fail (2 of
+15 matrix cases). Make `selector_seen = 1` conditional on `type > 0`, then rerun.
+
+Third learner attempt makes both the conflict check and state assignment
+selector-only. Strict build and full Norm pass; a 28-case stream matrix covers every
+selector alone, both bench orders, repeats, symmetric conflicts, late/unknown flags,
+and range/duplicate regressions with zero failures. An isolated ASan/UBSan harness
+also confirms successful context/start state and direct failure returns; no-relink
+passes. The learner explained that `set_flag` rejects repeated benchmark by setting
+status to zero when `bench_enabled` is already true. Close Slice 6 and return to
+Makefile cleanup integration.
+
+Cleanup probe after a full libft rebuild: built state has 7 root and 43 libft
+objects, the binary, and the archive. Root `clean` removes only the 7 root objects;
+root `fclean` then removes only the binary, leaving all 43 libft objects and
+`libft.a`. The normal built state was restored. Have the learner distinguish clean
+from fclean and then forward the corresponding sub-Make targets. The learner now
+explains that clean removes root/libft objects while retaining the binary/archive,
+and fclean additionally removes both final targets. Proceed with the minimal root
+Makefile delegation and artifact-state test.
+
+Cleanup delegation is implemented and verified: starting with 7 root and 43 libft
+objects, root `clean` removes both object sets while retaining the binary/archive;
+root `fclean` removes all objects plus both final targets; `re` restores the full
+build. Repeated `make` preserves binary/archive timestamps, and full Norm plus parser
+smokes pass after rebuilding. Proceed to Slice 7 rank assignment; keep milestone 2
+in verification until unavailable LeakSanitizer/Valgrind evidence can be replaced or
+obtained.
 
 ## Ordered slices
 

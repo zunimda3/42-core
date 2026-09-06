@@ -6,7 +6,7 @@
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/06 13:07:28 by naamir            #+#    #+#             */
-/*   Updated: 2026/09/06 16:12:41 by naamir           ###   ########.fr       */
+/*   Updated: 2026/09/06 19:55:46 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,10 @@ int	parse_flags(t_context *ctx, int argc, char **argv, int *start)
 	int	i;
 	int	status;
 	int	type;
+	int	selector_seen;
 
 	status = 1;
+	selector_seen = 0;
 	i = 1;
 	while (i < argc && status == 1)
 	{
@@ -80,6 +82,10 @@ int	parse_flags(t_context *ctx, int argc, char **argv, int *start)
 			*start = i;
 			return (1);
 		}
+		if (type && selector_seen == 1)
+			return (0);
+		if (type)
+			selector_seen = 1;
 		set_flag(ctx, type, &status);
 		i++;
 	}

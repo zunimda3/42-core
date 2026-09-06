@@ -17,11 +17,10 @@ update, but it must not edit this file until the learner approves the exact chan
 ## Current Focus
 
 - **Milestone:** 2 — build, parsing, and lifetime
-- **Status:** `IMPLEMENTING`
-- **Next small step:** return to the parked overflow-safe conversion (Slice 4
-  remainder) to close numeric parsing — replace unguarded `ft_atoi` with
-  `INT_MIN`/`INT_MAX`-exact conversion and test the boundary family; after that,
-  milestone 2's parsing gate has only rank/operation-engine work downstream.
+- **Status:** `VERIFYING`
+- **Next small step:** compare rank-assignment techniques and choose the smallest
+  defensible implementation slice. Milestone 2's implemented gates pass; it remains
+  `VERIFYING` because LeakSanitizer/Valgrind evidence is still unavailable.
 - **Paused design question:** operation metrics and emission remain undecided until
   the operation engine is the next implementation dependency.
 - **Outstanding team requirement:** the subject requires exactly two learners, but a
@@ -41,7 +40,7 @@ Observed on 2026-09-05:
 - The copied libft has an isolated root Makefile target: it creates
   `libft/libft.a`, and a repeated invocation leaves the archive timestamp unchanged.
   A strict root build now links the archive after the project objects and resolves
-  `ft_isdigit`; forwarding cleanup remains unfinished.
+  `ft_isdigit`; root cleanup now delegates `clean`/`fclean` to libft.
 - `is_valid_int` strictly builds, passes its focused 12-case syntax suite, and
   correctly accepts ordinary signed digit strings while rejecting empty, sign-only,
   whitespace, suffix, and repeated-sign inputs. The learner chose to defer exact
@@ -103,8 +102,8 @@ Evidence should be recorded here only after the learner has seen and understood 
 
 | Area | Minimum scenarios | Evidence |
 | --- | --- | --- |
-| Build | `all`, repeated `all`, `clean`, `fclean`, `re`; required flags | Minimal shell passes fresh strict build; no-argument run exits 0 with empty stdout/stderr; repeated `make` reports nothing to do and preserves the binary timestamp; `clean` retains only the binary, `fclean` removes it, and `re` rebuilds. Umbrella-header dependencies are explicit; a temporary-copy probe showed a newer header rebuilds every object and then relinks. Learner explained both timestamp comparisons. The isolated root `libft/libft.a` target creates the archive; a repeated invocation reports it up to date and preserves its timestamp. Final binary linkage and cleanup integration remain pending. |
-| Parsing | no args, one integer, signs, `INT_MIN/MAX`, overflow, non-number, empty token, duplicates, invalid/conflicting flags | Focused token-syntax suite passes 12 cases: unsigned and signed zero/ordinary digits are accepted; empty, sign-only, whitespace, suffix, and repeated-sign tokens are rejected. An isolated `parse_numbers` suite passes five scenarios under strict build and ASan/UBSan: left-to-right order with the first integer on top, correct `size`, mid-stream failure leaving an owned partial stack that `main`'s cleanup frees, immediate failure with an empty stack, and starting-index selection. Integrated `main` shows silent no-args, `Error\n` on stderr for a mid-stream invalid token, and silent valid input. Flag phase verified 2026-09-06: `parse_flags` (new `parse_flags.c`, in Makefile SRCS, prototype in `push_swap.h`) consumes exact `--bench`/selector tokens before the first non-flag token into `bench_enabled`/`strategy`, records the first-integer index via `int *start`, and rejects repeated `--bench`, conflicting selectors, and flags after the numeric boundary. Isolated ten-scenario harness plus a full 18-row stream matrix through the real binary: all valid flag+integer combinations (both bench/selector orders), plain integers, and flags-only runs are silent on both streams; `--bench --bench`, `--simple --adaptive`, `--bench 3 --bench`, `--benchmark`, non-integers, and duplicates print exactly `Error\n` on stderr with exit 0. Learner debugged the `&start` pointer bug (literal `1` passed instead of the address) and the bench/selector guard conflation via the matrix. A Norm-forced refactor (2026-09-06) extracted the five-branch flag dispatch into `static int flag_type`, slimmed `parse_flags` to 22 lines, and re-verified Norm-OK with an identical matrix. `norminette *.c *.h` and strict build remain clean. Range conversion (overflow, `INT_MIN`/`INT_MAX`) remains the sole open parsing row. Duplicate detection verified 2026-09-06 after Norm-forced refactor: `validated_node` walks `a` before allocating, returning NULL on a value match, and `parse_numbers` attaches only validated nodes. Strict build plus stream capture show mid-stream, front, end, adjacent-negative, and zero duplicates each print exactly `Error\n` to stderr with empty stdout and exit 0; single-node, all-unique, and negative-vs-positive controls stay silent. `norminette *.c *.h` is OK and repeated `make` does not relink. Subject confirmed invalid input requires exactly `Error\n` on stderr with no exit-code requirement, so exit 0 on error is acceptable. Range conversion (overflow, `INT_MIN`/`INT_MAX`), duplicates row now passing, and flags remain pending. |
+| Build | `all`, repeated `all`, `clean`, `fclean`, `re`; required flags | Minimal shell passes fresh strict build; no-argument run exits 0 with empty stdout/stderr; repeated `make` reports nothing to do and preserves the binary timestamp; `clean` retains only the binary, `fclean` removes it, and `re` rebuilds. Umbrella-header dependencies are explicit; a temporary-copy probe showed a newer header rebuilds every object and then relinks. Learner explained both timestamp comparisons. The root target creates and links `libft/libft.a` after project objects. Cleanup delegation verified 2026-09-06 from a full 7-root/43-libft-object state: `clean` removes both object sets while retaining `push_swap` and `libft.a`; `fclean` removes both final targets too; `re` restores all artifacts; repeated `make` preserves binary/archive timestamps. Full Norm and parsing smoke checks remain clean after `re`. |
+| Parsing | no args, one integer, signs, `INT_MIN/MAX`, overflow, non-number, empty token, duplicates, invalid/conflicting flags | Focused token-syntax suite passes 12 cases: unsigned and signed zero/ordinary digits are accepted; empty, sign-only, whitespace, suffix, and repeated-sign tokens are rejected. An isolated `parse_numbers` suite passes five scenarios under strict build and ASan/UBSan: left-to-right order with the first integer on top, correct `size`, mid-stream failure leaving an owned partial stack that `main`'s cleanup frees, immediate failure with an empty stack, and starting-index selection. Integrated `main` shows silent no-args, `Error\n` on stderr for a mid-stream invalid token, and silent valid input. Flag phase verified 2026-09-06: `parse_flags` (new `parse_flags.c`, in Makefile SRCS, prototype in `push_swap.h`) consumes exact `--bench`/selector tokens before the first non-flag token into `bench_enabled`/`strategy`, records the first-integer index via `int *start`, and rejects repeated `--bench`, conflicting selectors, and flags after the numeric boundary. Isolated ten-scenario harness plus a full 18-row stream matrix through the real binary: all valid flag+integer combinations (both bench/selector orders), plain integers, and flags-only runs are silent on both streams; `--bench --bench`, `--simple --adaptive`, `--bench 3 --bench`, `--benchmark`, non-integers, and duplicates print exactly `Error\n` on stderr with exit 0. Learner debugged the `&start` pointer bug (literal `1` passed instead of the address) and the bench/selector guard conflation via the matrix. A Norm-forced refactor (2026-09-06) extracted the five-branch flag dispatch into `static int flag_type`, slimmed `parse_flags` to 22 lines, and re-verified Norm-OK with an identical matrix. `norminette *.c *.h` and strict build remain clean. Range conversion verified 2026-09-06 with guarded positive-magnitude `long long` accumulation: a strict ASan/UBSan assertion harness stores exact `INT_MAX`, `INT_MIN`, and zero, while stream captures accept both exact boundaries and reject immediate and arbitrarily long overflow with exactly `Error\n` on stderr. The learner explained sign/limit selection and that the final digit is rejected before its addition would cross the limit. Duplicate detection verified 2026-09-06 after Norm-forced refactor: `validated_node` walks `a` before allocating, returning NULL on a value match, and `parse_numbers` attaches only validated nodes. Strict build plus stream capture show mid-stream, front, end, adjacent-negative, and zero duplicates each print exactly `Error\n` to stderr with empty stdout and exit 0; single-node, all-unique, and negative-vs-positive controls stay silent. `norminette *.c *.h` is OK and repeated `make` does not relink. Subject confirmed invalid input requires exactly `Error\n` on stderr with no exit-code requirement, so exit 0 on error is acceptable. Syntax, range, and duplicates pass their focused cases. Fresh flag evidence first exposed an asymmetric adaptive-default defect. The learner traced it, implemented local selector-seen state, used two failing matrices to separate benchmark and selector state correctly, and explained that repeated benchmark is independently rejected through `bench_enabled`. The final strict build, full Norm, 28-case symmetric stream matrix, isolated ASan/UBSan contract harness, and no-relink check pass. |
 | Operations | each operation on empty, one-node, two-node, and ordinary stacks; combined-operation semantics | Pending |
 | Disorder | sorted = 0, reverse = 1, known intermediate inputs, fewer than two elements, boundaries 0.2 and 0.5 | Pending |
 | Streams | stdout contains only operations; errors and bench output use stderr; no bench text without `--bench` | Pending |
@@ -128,6 +127,7 @@ Do not record a design as final merely because an AI suggested it.
 | Persistent run-state organization | One program context vs. separate stack, option, disorder, and metrics objects | Chose one caller-owned context to carry both stacks, the selected strategy, benchmark state, initial disorder, and operation counters across parsing, sorting, reporting, and cleanup. This centralizes lifetime and avoids globals. | `naamir` |
 | Strategy representation | Retain the selector string vs. parse once into an enum | Store a `t_strategy` enum in the context, initialized to adaptive before parsing. Valid selectors replace that value, so sorting happens only after complete successful parsing and can dispatch without repeated string comparisons. | `naamir` |
 | Header boundary | Separate narrow `node.h` beneath `push_swap.h` vs. one project-wide umbrella header | Chose one `push_swap.h` containing node, stack, strategy, context, and all project prototypes; removed `node.h` and made every source include the umbrella. This favors one centralized interface, with the understood consequence that changing it may rebuild every object. | `naamir` |
+| Exact integer conversion | Negative `int` accumulation vs. a guarded positive magnitude in `long long` | Chose the wider positive accumulator for readability. A per-digit pre-check against `INT_MAX` or the magnitude of `INT_MIN` rejects overflow before multiplication, including arbitrarily long tokens; syntax validation remains a separate pass. Conversion is O(k) character work and emits no Push_swap operations. The retained implementation was written by AI at the learner's explicit request; the learner then explained its sign, limit, and rejection behavior. | `naamir` |
 | Duplicate detection | Walk the already-attached nodes of `a` per token vs. copy values into a temporary sorted array | Walk `a` before each allocation: worst-case n(n−1)/2 value comparisons, zero extra allocation, no new allocation-failure mode, and the duplicate is rejected before its node exists, so cleanup paths stay unchanged. The array approach is deferred until rank assignment can justify its own allocation on its own merits. | `naamir` |
 | Flag-phase boundary | Flag-looking tokens after numbers begin treated as invalid integers vs. special-cased anywhere | The flag phase consumes only exact `--bench`/`--simple`/`--medium`/`--complex`/`--adaptive` tokens; the first token that is not one of those exact strings ends the phase, so a later `--bench` after numbers begin is rejected as an invalid integer. `--bench` and one selector may appear in either order before the first integer; repeats and conflicts are invalid. This keeps one deterministic boundary and needs no lookahead. A run whose tokens are only
 flags, with no integers following, prints nothing like a no-parameter run;
@@ -155,20 +155,53 @@ bench/selector `set_flag`, and a `flag_type` dispatcher; debugged via the
 stream matrix the `&start` pointer pass, the bench/selector guard conflation,
 and the `1 < argc` loop-condition crash; wired `main` to parse flags then
 numbers with the flags-only silent guard; refactored `flag_type` out for
-Norm (22-line `parse_flags`) |
+Norm (22-line `parse_flags`); selected guarded positive-magnitude `long long`
+conversion over negative `int` accumulation for readability and explicitly
+requested the AI-authored `parser.c` rewrite; explanation and evidence
+interpretation followed by tracing the sign, positive magnitude limit, and
+final-digit overflow rejection; on 2026-09-06, traced `--adaptive --simple`:
+the context starts adaptive, remains adaptive after the explicit selector, and
+therefore incorrectly permits simple because the code mistakes the enum value
+for "no selector seen"; implemented a first local `selector_seen` attempt that
+now rejects selector conflicts but also treats `--bench` as a selector, exposed
+by the focused review matrix; restricted the second-attempt conflict check to
+nonzero types, then made assignment selector-only so the full symmetric matrix and
+isolated flag contract now pass; explained that repeated benchmark is rejected by
+`set_flag` setting status to zero when `bench_enabled` is already true; distinguished
+`clean` (remove root/libft objects, retain final targets) from `fclean` (also remove
+`push_swap` and `libft.a`); implemented root cleanup delegation to libft, with the
+full artifact-state, `re`, no-relink, Norm, and parser smoke checks passing |
 | Partner pending | None yet |
 
 ## Latest Session Handoff
 
-- **Last confirmed achievement:** implemented the reasonable-input numeric
-  builder and integrated it into `main`: `parse_numbers` builds `a` left-to-right
-  with a parser-local tail and returns status without printing; `main` always
-  initializes, parses only when arguments exist, prints `Error\n` to stderr as
-  the single error source, and cleans up on every path. The isolated
-  five-scenario parser suite and a three-path stream smoke pass strictly, with
-  Norminette and no-relink evidence.
+- **Last implementation evidence:** at the learner's explicit request, AI replaced
+  the negative-accumulation draft in `parser.c` with guarded positive-magnitude
+  `long long` conversion. Strict build, Norm, an ASan/UBSan assertion harness for
+  exact `INT_MIN`/`INT_MAX`, and the focused syntax/range/duplicate stream
+  regression pass. The learner interpreted the limit selection and explained
+  that invalid final-digit addition is rejected before crossing that limit.
+- **Latest interpreted finding:** the selector-conflict check is asymmetric because
+  `STRATEGY_ADAPTIVE` represents both the default and an explicit `--adaptive`;
+  the learner traced why adaptive-first repeats/conflicts are incorrectly accepted.
+- **Latest implementation evidence:** the learner added local `selector_seen` state;
+  strict build and Norm pass, and selector repeats/conflicts now reject externally,
+  but the focused matrix shows valid bench-plus-selector orders fail because every
+  recognized flag currently consumes/checks selector state. Learner interpretation
+  of this new evidence is pending.
+- **Second-attempt evidence:** strict build and Norm still pass. Selector-first bench
+  combinations now pass, but bench-first simple/adaptive still fail: the check is
+  selector-only, while `selector_seen = 1` remains unconditional after benchmark.
+- **Third-attempt evidence:** the learner made assignment selector-only. Strict build,
+  full Norm, all 28 stream cases, an isolated ASan/UBSan flag-contract harness, and
+  no-relink check pass. The learner explained the independent `bench_enabled`
+  rejection path, closing the focused flag gate.
+- **Latest learning evidence:** the learner distinguished intermediate object cleanup
+  from final-target cleanup across both the root project and libft.
+- **Latest build evidence:** root `clean`/`fclean` now delegate to libft. From a full
+  build, artifact-state checks confirm the intended clean/fclean distinction; `re`,
+  strict compilation, full Norm, parser smoke checks, and no-relink all pass.
 - **Open question:** who is the required second learner?
-- **Resume with:** the overflow-safe conversion replacing unguarded `ft_atoi`
-  in `validated_node` — the sole open parsing row for milestone 2; then rank
-  assignment or the operation engine, per the build sequence. Flag phase and
-  duplicate detection are both complete and Norm-clean.
+- **Resume with:** compare count-smaller O(n²)/O(1) auxiliary space against
+  copy-sort-map O(n log n)/O(n) auxiliary space for rank assignment, then choose
+  and build only that slice.
