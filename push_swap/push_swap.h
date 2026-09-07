@@ -6,7 +6,7 @@
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/05 10:08:44 by z                 #+#    #+#             */
-/*   Updated: 2026/09/06 18:51:36 by z                ###   ########.fr       */
+/*   Updated: 2026/09/07 19:31:57 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,22 @@ typedef enum e_strategy
 	STRATEGY_ADAPTIVE
 }					t_strategy;
 
+typedef enum e_operation
+{
+	OP_SA,
+	OP_SB,
+	OP_SS,
+	OP_PA,
+	OP_PB,
+	OP_RA,
+	OP_RB,
+	OP_RR,
+	OP_RRA,
+	OP_RRB,
+	OP_RRR,
+	OP_COUNT
+}					t_operation;
+
 typedef struct s_context
 {
 	t_stack			a;
@@ -43,9 +59,12 @@ typedef struct s_context
 	t_strategy		strategy;
 	int				bench_enabled;
 	double			initial_disorder;
+	size_t			counts[OP_COUNT];
+	size_t			total;
 }					t_context;
 
 void				ps_lstadd_top(t_stack *stack, t_node *new);
+void				ps_lstadd_back(t_stack *stack, t_node *node);
 t_node				*ps_node_new(int value);
 void				ps_lstclear(t_stack *stack);
 void				context_init(t_context *content);
@@ -55,5 +74,27 @@ int					parse_numbers(t_context *ctx, int argc, char **argv,
 						int start);
 int					parse_flags(t_context *ctx, int argc, char **argv,
 						int *start);
+void				assign_ranks(t_stack *stack);
+
+/* Operation Definition */
+void				swap(t_stack *stack);
+void				push(t_stack *source, t_stack *destination);
+void				rotate(t_stack *stack);
+void				reverse_rotate(t_stack *stack);
+
+/* Operation Executions */
+void				execute_sa(t_context *ctx);
+void				execute_pa(t_context *ctx);
+void				execute_ra(t_context *ctx);
+void				execute_rra(t_context *ctx);
+void				execute_sb(t_context *ctx);
+void				execute_pb(t_context *ctx);
+void				execute_rb(t_context *ctx);
+void				execute_rrb(t_context *ctx);
+void				execute_ss(t_context *ctx);
+void				execute_rr(t_context *ctx);
+void				execute_rrr(t_context *ctx);
+
+void				execute_operation(t_context *ctx, t_operation op);
 
 #endif

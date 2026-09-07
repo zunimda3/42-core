@@ -6,11 +6,18 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror
 CPPFLAGS = -I. -Ilibft
 SRCS = ps_lstadd_top.c \
+	   ps_lstadd_back.c \
 	   ps_lstclear.c \
 	   ps_node_new.c \
 	   context_init.c \
 	   parser.c \
 	   parse_flags.c \
+	   assign_ranks.c \
+	   operations.c \
+	   execute_operation.c \
+	   operation_a.c \
+	   operation_b.c \
+	   operation_combined.c \
 	   main.c
 OBJS = $(SRCS:.c=.o)
 

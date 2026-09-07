@@ -36,7 +36,11 @@ completion and must not decide unresolved choices for the learners.
   final-digit rejection.
 - Rank assignment uses count-smaller traversal: O(n²) C comparisons, O(1) auxiliary
   space, no allocation/failure path, and exactly zero generated operations.
-- Metrics layout, operation emission policy, rank method, and algorithms are open.
+- Operation metrics use a `t_operation` enum, `counts[OP_COUNT]`, and `total` so one
+  operation identifier can drive mutation, output, and counting.
+- Wholly ineffective commands are suppressed because the canonical subject requires
+  the smallest generated list; combined commands emit/count once if either side
+  changes. Algorithms remain open.
 
 ## Active cursor
 
@@ -282,15 +286,63 @@ number of smaller values. Test empty, single, sorted, reverse, and mixed cases w
 asserting values, links, order, and authoritative size are unchanged.
 
 The learner selected `void assign_ranks(t_stack *stack)` rather than a context
-parameter because the function needs only one stack's nodes. Add only this function,
-its umbrella declaration, and its build source before isolated tests; integrate the
-call only after the focused invariant gate passes.
+parameter because the function needs only one stack's nodes. The learner has now
+implemented the nested count-smaller traversal and added its umbrella declaration
+and Makefile source entry; strict compilation and Norm pass. An AI-authored temporary
+harness is diagnostic only, not learner-interpreted gate evidence. Integrate the call
+after successful parsing, then obtain a learner-owned focused invariant test before
+moving to primitive mutations. The first integration attempt places the call directly
+after `parse_numbers`, so it still runs when parsing returns failure with a partially
+owned stack. The learner added the success guard; strict build and Norm pass, valid
+input remains silent, and invalid mid-stream input still emits only `Error\n` on
+stderr. Obtain the learner-owned focused invariant test next.
+
+The learner has explicitly deferred that learner-owned rank suite to keep development
+moving. Preserve it as a required verification item and proceed to Slice 8; do not
+treat the AI-authored diagnostic harness as closing the rank gate.
 
 ### 8. Primitive mutations
 
 Implement internal swap, push, rotate, and reverse-rotate without output first.
 Combined commands apply primitives without recursively emitting two commands. Test
 empty, one, two, and many nodes; exact links/sizes; pushes allocate/free nothing.
+
+The learner created `operations.c` with `swap(t_stack *)`: the fewer-than-two guard
+and three-link rewiring are correct, and standalone strict syntax compilation plus
+Norm pass. Its umbrella declaration and Makefile source entry are now present; fresh
+strict build, Norm, and no-relink checks pass. An AI-authored ASan/UBSan diagnostic
+covers empty, single, and three-node behavior but is not learner-owned gate evidence.
+Proceed to the raw push transfer while retaining focused operation tests as a gate.
+
+The learner chose the source-first interface `push(source, destination)`. The first
+body rewrites `source->top->next` and adjusts sizes but never advances `source->top`
+or assigns `destination->top`, disconnecting the remaining source chain. Correct it
+with a saved moved-node pointer and both top assignments before proceeding.
+
+The learner corrected raw push with the saved moved-node pointer, both top updates,
+and balanced size changes. Strict build and Norm pass; an AI-authored ASan/UBSan
+diagnostic covers empty-source no-op and many-to-nonempty transfer but is not
+learner-owned evidence. Proceed to raw rotate.
+
+The learner added raw `rotate(t_stack *)` plus `ps_lstadd_back`. Its guarded detach
+and append logic preserves size, and the real strict build plus Norm pass. The header
+duplicate is removed and `rotate` is now declared; repeated make performs no relink.
+The learner explained that the tail helper must not change size because rotate only
+reorders existing membership. Proceed to raw reverse-rotate.
+
+The first reverse-rotate attempt walks only to the final node, then links it to the
+old top. Because the penultimate node still points to that final node, the result is
+a cycle. Track both nodes, clear the penultimate link before installing the last as
+the new top, and add the missing umbrella prototype. The learner corrected the link
+logic, but a stale unused `i` now fails `-Werror`, and the prototype is still absent;
+remove/add those respectively, then rebuild. Both are now corrected; strict build and
+Norm pass, and an AI-authored ASan/UBSan diagnostic covers empty, single, and
+three-node behavior without replacing the deferred learner-owned primitive suite.
+Proceed to the operation emission/metrics contract.
+
+Current development cursor: begin with the narrow internal swap primitive. It changes
+only the first two links and `top`, leaves `size` unchanged, and is a no-op below two
+nodes. Keep output and metrics out of this slice.
 
 ### 9. Operation emission and metrics
 
@@ -299,6 +351,40 @@ commands are suppressed or printed/counted, including partial combined commands.
 one dispatcher so each emitted command mutates state, writes exactly one mnemonic,
 increments exactly one individual counter, and increments total. Maintain
 `total == sum(individual) == stdout line count`.
+
+The learner chose the enum-indexed array and explained that enum members are integer
+indexes into numeric counters, not values that must first be stored in the array.
+Add the enum and context fields, then initialize all counters and total to zero before
+building the dispatcher. Direct PDF review resolved the no-op policy: suppress a
+command when it changes no state; for a combined command, emit/count one combined
+mnemonic if at least one side changes. Build only the first `sa` path next.
+
+The learner instead completed all 11 handlers and enum dispatch at once, splitting
+them across Norm-sized files and intentionally colocating emission/counting in every
+handler rather than using a shared emitter. Strict build and Norm pass. An AI-authored
+all-operation diagnostic confirms mutations, suppression, and selected counters, but
+finds three stream-length defects: `rra\n`, `rrb\n`, and `rrr\n` are written with
+length 3, collapsing 11 commands into 8 lines. Change those lengths to 4 before the
+focused operation gate.
+
+The first correction fixed `rrr\n`, but left `rra\n`/`rrb\n` at 3 and changed
+`ss\n`/`rr\n` to 4. Since `write` emits exactly the requested byte count, those two
+short mnemonics now include terminating NUL bytes. Required lengths are 3 for every
+two-letter mnemonic plus newline and 4 for every three-letter mnemonic plus newline.
+
+The learner corrected all five affected call lengths. Strict build and full operation
+Norm pass; the AI-authored all-operation diagnostic passes under ASan/UBSan and emits
+11 clean newline-terminated mnemonics, 36 bytes total, with no NUL bytes. Keep the
+learner-owned operation suite deferred as the Milestone 3 gate and proceed to initial
+disorder without marking the engine done.
+
+The learner added the enum and context fields. The first initializer uses
+`while (i++ < OP_COUNT)`, so the body begins at index 1 and ends by writing index
+`OP_COUNT`; UBSan reports index 11 out of bounds. Use the current index in the body,
+then increment it afterward, and rerun the focused initialization gate. The learner
+made that correction; strict build and Norm pass, and an AI-authored ASan/UBSan
+harness sees every counter plus total initialized to zero. Resolve the no-op policy,
+then build only the first `sa` dispatcher path.
 
 ### 10. Initial disorder and dispatch
 

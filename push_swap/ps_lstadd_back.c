@@ -1,39 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   ps_lstadd_back.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/05 09:47:59 by z                 #+#    #+#             */
-/*   Updated: 2026/09/07 16:51:57 by z                ###   ########.fr       */
+/*   Created: 2026/09/07 17:32:32 by z                 #+#    #+#             */
+/*   Updated: 2026/09/07 17:32:58 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-int	main(int argc, char **argv)
+void	ps_lstadd_back(t_stack *stack, t_node *node)
 {
-	t_context	context;
-	int			ok;
-	int			start;
+	t_node	*ptr;
 
-	context_init(&context);
-	ok = 1;
-	start = 1;
-	if (argc > 1)
-	{
-		ok = parse_flags(&context, argc, argv, &start);
-		if (ok && start < argc)
-		{
-			ok = parse_numbers(&context, argc, argv, start);
-			if (ok)
-				assign_ranks(&context.a);
-		}
-	}
-	if (!ok)
-		write(2, "Error\n", 6);
-	ps_lstclear(&context.a);
-	ps_lstclear(&context.b);
-	return (0);
+	ptr = stack->top;
+	while (ptr->next)
+		ptr = ptr->next;
+	ptr->next = node;
 }

@@ -16,13 +16,17 @@ update, but it must not edit this file until the learner approves the exact chan
 
 ## Current Focus
 
-- **Milestone:** 2 — build, parsing, and lifetime
-- **Status:** `VERIFYING`
-- **Next small step:** implement the chosen count-smaller rank assignment as a
-  focused no-allocation slice, then assert contiguous ranks while preserving values,
-  links, order, and size. Milestone 2 remains `VERIFYING` only for memory tooling.
-- **Paused design question:** operation metrics and emission remain undecided until
-  the operation engine is the next implementation dependency.
+- **Milestone:** 4 — disorder, selection, and benchmark foundation
+- **Status:** `LEARNING`
+- **Next small step:** define a read-only disorder function for one stack, using wide
+  inversion/pair counters and returning zero below two nodes; integrate its result
+  before any future emitted operation only after focused checks.
+- **Deferred verification:** add the learner-owned rank suite covering empty, single,
+  sorted, reverse, and mixed stacks while proving values, links, order, top, and size
+  remain unchanged; also add learner-owned 0/1/2/many-node tests for raw swap, push,
+  rotate, and reverse-rotate. Milestone 2 remains `VERIFYING` for memory tooling.
+- **Confirmed output rule:** suppress wholly ineffective commands; a combined command
+  emits/counts once when at least one component changes.
 - **Outstanding team requirement:** the subject requires exactly two learners, but a
   partner has not yet been confirmed; this does not block architecture learning.
 
@@ -64,8 +68,11 @@ Observed on 2026-09-05:
   copy confirmed a newer umbrella header rebuilds all objects and relinks.
 - `push_swap.h` defines typed `value`, `rank`, and `next` node fields plus a stack
   wrapper with authoritative `top` and `size`.
-- Missing major deliverables: parser hardening (range, duplicates, flags),
-  operations, strategies, benchmark mode, and README.
+- `assign_ranks.c` now contains the learner-written count-smaller traversal; its
+  umbrella declaration and Makefile source entry are present. Strict compilation
+  and Norm pass. The AI-generated temporary invariant harness is diagnostic only
+  and is not recorded as learner-interpreted verification evidence.
+- Missing major deliverables: operations, strategies, benchmark mode, and README.
 - `cc`, `make`, and `norminette` are available.
 - Valgrind and a checker binary are not currently available; compiler sanitizers can
   provide interim memory diagnostics.
@@ -83,8 +90,8 @@ Observed on 2026-09-05:
 | 0 | Subject and team orientation | `LEARNING` | Learner explains the deliverables, four strategies, disorder regimes, streams, performance gates, and group obligations; partner status is recorded. |
 | 1 | Interface and architecture decisions | `IMPLEMENTING` | Top-of-stack invariant, node/data representation, ownership, input/flag grammar, operation-emission contract, and module boundaries are documented and explained. |
 | 2 | Build, parsing, and lifetime | `IMPLEMENTING` | Required Makefile rules work without relinking; valid inputs build `a`; all invalid-input families print only `Error\n` to stderr; every error path frees memory. |
-| 3 | Operation engine | `NOT STARTED` | All 11 operations pass focused 0/1/2/many-node tests, preserve invariants, emit only allowed stdout lines, and update metrics through one understood contract. |
-| 4 | Disorder, selection, and benchmark foundation | `NOT STARTED` | Disorder is computed before moves; known cases and 0.2/0.5 boundaries pass; default/forced selectors work; benchmark data stays on stderr and operation data stays on stdout. |
+| 3 | Operation engine | `VERIFYING` | All 11 operations pass focused 0/1/2/many-node tests, preserve invariants, emit only allowed stdout lines, and update metrics through one understood contract. |
+| 4 | Disorder, selection, and benchmark foundation | `LEARNING` | Disorder is computed before moves; known cases and 0.2/0.5 boundaries pass; default/forced selectors work; benchmark data stays on stderr and operation data stays on stdout. |
 | 5 | Simple O(n²) strategy | `NOT STARTED` | Learners compare candidates, select and justify one, prove its generated-operation upper bound, and pass forced-strategy correctness tests. |
 | 6 | Medium O(n√n) strategy | `NOT STARTED` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
 | 7 | Complex O(n log n) strategy | `NOT STARTED` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
@@ -133,6 +140,11 @@ Do not record a design as final merely because an AI suggested it.
 flags, with no integers following, prints nothing like a no-parameter run;
 this is a learner-confirmed reading of the subject's unspecified corner. | `naamir` |
 | Rank assignment | Count-smaller traversal vs. copy-sort-map array; narrow `t_stack *` vs. whole `t_context *` interface | Chose count-smaller: each node's rank is the number of smaller values. It is O(n²) C comparisons, O(1) auxiliary space, requires no allocation or failure cleanup, preserves values/link order, and generates exactly zero Push_swap operations. Chose `void assign_ranks(t_stack *stack)` because ranking needs only one stack's nodes, not options or the other stack. The learner prioritized simplicity because ranking work does not count toward emitted-operation thresholds, while acknowledging ordinary runtime still exists. | `naamir` |
+| Raw push parameter order | Destination-first vs. source-first | Chose `push(source, destination)` so the first argument relinquishes ownership and the second receives the same node. The primitive allocates and frees nothing. | `naamir` |
+| Raw rotate tail helper | Generic add-back changes size vs. rotation-only tail link preserves size | `ps_lstadd_back` only links the already-owned moved node at the tail and deliberately does not change size. Rotate changes order within one stack, not membership; the learner explained that its node count therefore remains unchanged. | `naamir` |
+| Operation metrics representation | Eleven named context fields vs. an enum-indexed counter array | Chose a `t_operation` enum with all 11 commands plus `OP_COUNT`, `size_t counts[OP_COUNT]`, and `size_t total`. One operation identifier can drive mutation, output, and its matching counter; iteration can initialize, sum, and report all counters consistently. The learner explained that enum members are compile-time integer indexes rather than values stored in the array. | `naamir` |
+| No-op emission and counting | Always emit requested commands vs. suppress commands that change no state | The canonical PDF says primitive operations do nothing when their precondition is absent, the strategy output is the operation sequence that sorts, and the program must display the smallest list possible. A wholly ineffective command can always be removed, so it must not be emitted or counted. A combined command emits/counts once if at least one component changes; its two primitives are never counted separately. | `en.subject.pdf` |
+| Operation wrapper organization | Shared emitter vs. emission/counting inside each command handler | Chose separate handlers for all 11 commands with mutation, stdout emission, and the matching individual/total increments colocated in each handler; `execute_operation` performs enum dispatch. This fits the Norm file/function limits and is direct, with the accepted maintenance risk that every handler must independently preserve mnemonic length and counter consistency. | `naamir` |
 | Simple strategy | Pending | Pending | Pending |
 | Medium strategy | Pending | Pending | Pending |
 | Complex strategy | Pending | Pending | Pending |
@@ -174,11 +186,91 @@ isolated flag contract now pass; explained that repeated benchmark is rejected b
 full artifact-state, `re`, no-relink, Norm, and parser smoke checks passing; traced
 zero-based ranks correctly and selected count-smaller rank assignment for its
 no-allocation simplicity and zero generated-operation cost; selected a narrow
-`t_stack *` interface because ranking needs only one stack's nodes |
+`t_stack *` interface because ranking needs only one stack's nodes; implemented
+the nested count-smaller traversal and added its umbrella declaration and Makefile
+source entry; implemented the first no-output/no-metrics `swap(t_stack *)` pointer
+primitive with a fewer-than-two no-op guard and unchanged size; chose and implemented
+the corrected source-first raw push transfer using a saved moved-node pointer and
+both top updates, with no allocation or freeing; implemented guarded raw rotate using
+a tail-link helper without changing stack size; corrected reverse-rotate by retaining
+and detaching the penultimate/last pair before installing the last as top; chose
+enum-indexed operation counters and explained how enum constants index numeric
+counter elements; implemented all 11 command handlers and enum dispatch with
+emission/counting colocated in each handler; corrected all mnemonic byte lengths so
+each generated command ends in exactly one newline with no NUL byte |
 | Partner pending | None yet |
 
 ## Latest Session Handoff
 
+- **All command handlers implemented:** the learner split `sa/pa/ra/rra`,
+  `sb/pb/rb/rrb`, combined `ss/rr/rrr`, raw primitives, and enum dispatch across
+  Norm-sized files, with emission/counting baked into each handler rather than a
+  shared emitter. Strict build and full operation-file Norm pass. An AI-authored
+  all-operation diagnostic confirms pointer effects, no-op suppression, and counter
+  selection, but exposes `write(..., 3)` for `rra\n`, `rrb\n`, and `rrr\n`: their
+  missing newlines collapse 11 emitted commands into only 8 stdout lines.
+- **First mnemonic-length correction:** `rrr\n` is corrected to 4, but `rra\n` and
+  `rrb\n` remain at 3; `ss\n` and `rr\n` were incorrectly changed to 4, causing
+  `write` to emit each string's terminating NUL. Strict build and Norm still pass,
+  while the byte-level diagnostic shows 36 bytes, 9 lines, two NUL bytes, and joined
+  reverse-operation mnemonics instead of the required 11 clean lines.
+- **Mnemonic-length correction complete:** strict build and full operation-file Norm
+  pass. The AI-authored all-operation diagnostic passes pointer/counter assertions
+  under ASan/UBSan and emits exactly 36 bytes as 11 newline-terminated mnemonics with
+  zero NUL bytes. Milestone 3 moves to `VERIFYING`; learner-owned edge/stream tests
+  remain required before `DONE`.
+- **Metrics decision:** the learner chose an operation enum plus
+  `counts[OP_COUNT]` and `total`, and explained that the enum constants are numeric
+  indexes while the array elements store counts.
+- **Canonical no-op rule:** direct review of the unchanged expected-hash PDF confirms
+  that primitives do nothing without their preconditions, generated output is the
+  sorting sequence, and the binary must display the smallest list possible. Therefore
+  wholly ineffective commands are suppressed; combined commands emit/count once when
+  either component changes.
+- **Metrics-state first attempt:** the enum and context fields are correctly placed,
+  and strict build plus Norm pass. The loop `while (i++ < OP_COUNT)` increments before
+  the body, skipping `counts[0]` and writing `counts[OP_COUNT]`; UBSan reports the
+  out-of-bounds index 11. Move the increment after the indexed assignment.
+- **Metrics-state correction:** the learner moved the increment after assignment.
+  Strict build and Norm pass; an AI-authored ASan/UBSan initialization harness sees
+  all 11 counters, total, and both empty-stack states initialized to zero with no
+  diagnostic. Learner-owned verification remains part of the operation gate.
+- **Operation-engine implementation:** the learner created `operations.c` with an
+  internal `swap(t_stack *)` primitive. Its pointer rewiring and size guard are
+  correct; it is now declared in `push_swap.h` and included in the Makefile. Fresh
+  strict build, Norm, and no-relink checks pass. An AI-authored ASan/UBSan diagnostic
+  covers empty, single, and three-node behavior, but is not learner-owned verification.
+- **Raw-push first attempt:** the learner chose `push(source, destination)`, but the
+  current body overwrites `source->top->next` before advancing either stack top and
+  never assigns `destination->top`. This disconnects the remainder of the source and
+  leaves both top pointers wrong even though standalone compilation and Norm pass.
+- **Raw-push correction:** the learner added the saved `moved` pointer, advances the
+  source top before relinking, assigns the destination top, and updates both sizes.
+  Strict build and Norm pass. An AI-authored ASan/UBSan diagnostic covers empty-source
+  no-op and a many-to-nonempty transfer but is not learner-owned verification.
+- **Rotate implementation:** the learner added a guarded raw rotate that detaches the
+  top node and appends it through a new `ps_lstadd_back` helper. Strict build and Norm
+  pass, its duplicate declaration is removed, and `rotate` now has an umbrella
+  prototype. A repeated build performs no relink. The learner explained that the
+  helper must not change size because rotate only reorders one stack's existing nodes.
+- **Reverse-rotate first attempt:** standalone strict syntax compilation and Norm
+  pass, but traversal retains only the last node. Linking that last node to the old
+  top without clearing the penultimate node's link creates a cycle instead of moving
+  the tail. Retain the penultimate pointer and detach the tail before relinking; the
+  umbrella prototype is also still missing.
+- **Reverse-rotate correction:** the learner now tracks the last and penultimate
+  nodes, clears the penultimate link, and moves the last node to top, eliminating the
+  original cycle. The stale unused variable is removed and the umbrella prototype is
+  present. Strict build and Norm pass; an AI-authored ASan/UBSan diagnostic covers
+  empty, single, and three-node behavior but is not learner-owned gate evidence.
+- **Current implementation:** the learner implemented `assign_ranks(t_stack *)`
+  with a reset count and full scan for every node, and added the header declaration
+  and Makefile source entry. The corrected `main` integration now guards the call
+  with successful `parse_numbers` status, preserving the complete-input barrier.
+  Strict compilation and Norm pass; valid input remains silent and invalid mid-stream
+  input still produces only `Error\n` on stderr. An AI-authored
+  temporary harness also passed, but it is not learner-owned or learner-interpreted
+  evidence and must not be used to close the focused gate.
 - **Last implementation evidence:** at the learner's explicit request, AI replaced
   the negative-accumulation draft in `parser.c` with guarded positive-magnitude
   `long long` conversion. Strict build, Norm, an ASan/UBSan assertion harness for
@@ -209,6 +301,7 @@ no-allocation simplicity and zero generated-operation cost; selected a narrow
   auxiliary space, with values/order unchanged and zero generated operations;
   `assign_ranks` takes only the `t_stack *` it actually needs.
 - **Open question:** who is the required second learner?
-- **Resume with:** use one outer node and one full-stack scan per node; assign the
-  count of smaller values to `rank`, then test empty, single, sorted, reverse, and
-  mixed stacks without changing values, links, order, or size.
+- **Deferred verification:** learner-owned rank tests for empty, single, sorted,
+  reverse, and mixed stacks, including unchanged structural invariants.
+- **Resume with:** implement the smallest no-output internal swap primitive before
+  deciding the later emission and metrics contract.

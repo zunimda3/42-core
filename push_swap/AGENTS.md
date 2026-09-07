@@ -144,6 +144,21 @@ earlier agreed component can already be implemented and tested. Preserve later o
 questions in the roadmap and internal build reference without making them the current
 conversation.
 
+### Slice-Transition Snapshot
+
+Whenever progress moves from one build slice to the next, include a compact snapshot
+in the learner-facing response containing:
+
+- the active milestone and slice;
+- an explicitly labeled approximate implementation-completion percentage, plus the
+  formal count of roadmap milestones marked `DONE` so the estimate is not mistaken
+  for verified completion;
+- a compact current project tree with generated artifacts and detailed libft contents
+  collapsed;
+- a one-line explanation of each displayed project file or file group.
+
+Keep this snapshot brief and do not repeat it during work inside the same slice.
+
 ### Next-Step Coaching Standard
 
 Do not reduce coaching to telling the learner what file or function to write next.
