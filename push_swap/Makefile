@@ -5,20 +5,17 @@ NAME = push_swap
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 CPPFLAGS = -I. -Ilibft
-SRCS = ps_lstadd_top.c \
-	   ps_lstadd_back.c \
-	   ps_lstclear.c \
-	   ps_node_new.c \
+SRCS = stack_utils.c \
 	   context_init.c \
-	   parser.c \
+	   parse_numbers.c \
 	   parse_flags.c \
 	   operations.c \
 	   execute_operation.c \
 	   operation_a.c \
 	   operation_b.c \
 	   operation_combined.c \
-	   resolve_strategy.c \
 	   stack_analysis.c \
+	   strategy_dispatch.c \
 	   main.c
 OBJS = $(SRCS:.c=.o)
 

@@ -6,7 +6,7 @@
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/05 10:08:44 by z                 #+#    #+#             */
-/*   Updated: 2026/09/08 20:19:16 by z                ###   ########.fr       */
+/*   Updated: 2026/09/08 21:24:36 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,18 +63,25 @@ typedef struct s_context
 	size_t			total;
 }					t_context;
 
-void				ps_lstadd_top(t_stack *stack, t_node *new);
-void				ps_lstadd_back(t_stack *stack, t_node *node);
-t_node				*ps_node_new(int value);
-void				ps_lstclear(t_stack *stack);
+/* Initialize Context */
 void				context_init(t_context *content);
 
-int					is_valid_int(const char *str);
-int					parse_numbers(t_context *ctx, int argc, char **argv,
-						int start);
+/* Parse Flags & Numbers */
 int					parse_flags(t_context *ctx, int argc, char **argv,
 						int *start);
+int					parse_numbers(t_context *ctx, int argc, char **argv,
+						int start);
+
+/* Operations for Linked Lists*/
+t_node				*ps_lstnew(int value);
+void				ps_lstadd_top(t_stack *stack, t_node *new);
+void				ps_lstadd_back(t_stack *stack, t_node *node);
+void				ps_lstclear(t_stack *stack);
+
+/* Stack Analysis */
 void				assign_ranks(t_stack *stack);
+double				compute_disorder(const t_stack *stack);
+int					is_sorted(const t_stack *stack);
 
 /* Operation Definition */
 void				swap(t_stack *stack);
@@ -96,8 +103,9 @@ void				execute_rr(t_context *ctx);
 void				execute_rrr(t_context *ctx);
 
 void				execute_operation(t_context *ctx, t_operation op);
-double				compute_disorder(const t_stack *stack);
+
+/* Strategy Dispatch */
 t_strategy			resolve_strategy(t_strategy requested, double disorder);
-int					is_sorted(const t_stack *stack);
+int					run_strategy(t_context *ctx);
 
 #endif

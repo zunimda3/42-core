@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser.c                                           :+:      :+:    :+:   */
+/*   parse_numbers.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: naamir <naamir@42kl.edu.my>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/05 13:34:09 by naamir            #+#    #+#             */
-/*   Updated: 2026/09/06 18:59:33 by z                ###   ########.fr       */
+/*   Updated: 2026/09/08 21:08:54 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 #include <limits.h>
 
-int	is_valid_int(const char *str)
+static int	is_valid_int(const char *str)
 {
 	if (!*str)
 		return (0);
@@ -81,7 +81,7 @@ static t_node	*validated_node(t_context *ctx, char *str)
 		return (NULL);
 	if (!is_in_a(ctx, num))
 		return (NULL);
-	new = ps_node_new(num);
+	new = ps_lstnew(num);
 	if (!new)
 		return (NULL);
 	return (new);

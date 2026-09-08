@@ -18,8 +18,9 @@ update, but it must not edit this file until the learner approves the exact chan
 
 - **Milestone:** 5 — simple O(n²) strategy
 - **Status:** `LEARNING`
-- **Next small step:** compare minimum-extraction and insertion-style two-stack
-  adaptations, then trace one small input before choosing the baseline strategy.
+- **Next small step:** compare minimum extraction and insertion-style placement,
+  trace a small case, and select the real simple strategy that will replace the
+  dispatcher's first failure placeholder.
 - **Deferred verification:** Milestone 4 retains the postponed disorder, resolver,
   and sortedness checks; also add the learner-owned rank suite and 0/1/2/many-node
   raw-operation tests. Milestone 2 remains `VERIFYING` for memory tooling.
@@ -144,6 +145,7 @@ this is a learner-confirmed reading of the subject's unspecified corner. | `naam
 | Operation metrics representation | Eleven named context fields vs. an enum-indexed counter array | Chose a `t_operation` enum with all 11 commands plus `OP_COUNT`, `size_t counts[OP_COUNT]`, and `size_t total`. One operation identifier can drive mutation, output, and its matching counter; iteration can initialize, sum, and report all counters consistently. The learner explained that enum members are compile-time integer indexes rather than values stored in the array. | `naamir` |
 | No-op emission and counting | Always emit requested commands vs. suppress commands that change no state | The canonical PDF says primitive operations do nothing when their precondition is absent, the strategy output is the operation sequence that sorts, and the program must display the smallest list possible. A wholly ineffective command can always be removed, so it must not be emitted or counted. A combined command emits/counts once if at least one component changes; its two primitives are never counted separately. | `en.subject.pdf` |
 | Operation wrapper organization | Shared emitter vs. emission/counting inside each command handler | Chose separate handlers for all 11 commands with mutation, stdout emission, and the matching individual/total increments colocated in each handler; `execute_operation` performs enum dispatch. This fits the Norm file/function limits and is direct, with the accepted maintenance risk that every handler must independently preserve mnemonic length and counter consistency. | `naamir` |
+| Strategy dispatcher sequencing | Implement strategies first vs. compile empty strategy stubs vs. define dispatcher architecture first | Define the dispatcher contract and complete call flow before building the simple strategy, so later work has a clear integration target. `run_strategy` returns `1` on success and `0` on a strategy/allocation failure; `main` owns `Error\n`. Do not compile empty strategy bodies: they would make valid unsorted input follow the error path or silently remain unsorted. Add the dispatcher source only when real callees make it a useful compilable slice. | `naamir` |
 | Simple strategy | Pending | Pending | Pending |
 | Medium strategy | Pending | Pending | Pending |
 | Complex strategy | Pending | Pending | Pending |
@@ -200,7 +202,13 @@ each generated command ends in exactly one newline with no NUL byte; chose a pur
 adaptive resolver that preserves the requested strategy enum while returning the
 effective complexity-class method for dispatch and later benchmark reporting;
 consolidated rank/disorder/sortedness work into `stack_analysis.c` and implemented
-the const-correct adjacent-order `is_sorted` query with its public interface |
+the const-correct adjacent-order `is_sorted` query with its public interface; chose
+to define the strategy-dispatch architecture before individual strategies while
+rejecting compiled empty stubs that could masquerade as successful sorting; traced
+the dispatcher's `0` return through `main`'s `!ok` branch and confirmed the shared
+success/failure contract; reorganized numeric parsing into `parse_numbers.c`, merged
+specialized node/list helpers into `stack_utils.c`, grouped resolution/dispatch in
+`strategy_dispatch.c`, and synchronized the public declarations and Makefile sources |
 | Partner pending | None yet |
 
 ## Latest Session Handoff
@@ -359,3 +367,61 @@ the const-correct adjacent-order `is_sorted` query with its public interface |
   treating Milestone 4 as complete.
 - **Resume with:** compare and trace minimum extraction versus insertion-style
   placement in legal Push_swap operations before selecting the O(n²) baseline.
+- **Dispatcher-first clarification:** the learner wants the central selection and
+  execution path designed before implementing the individual strategies. The agreed
+  order is contract/control-flow first, then real strategy implementations, then the
+  compilable dispatcher connection; empty sorting stubs are excluded because they
+  would create false-success behavior.
+- **Resume with:** settle the dispatcher's responsibilities and error-return boundary,
+  then return directly to selecting and building the simple strategy.
+- **Dispatcher draft:** the learner created untracked `strategy_dispatch.c` with the
+  agreed sorted-input guard and pure effective-strategy resolution. It passes strict
+  standalone compilation and Norm and is correctly absent from the project build for
+  now. All three unsorted branches return `0`; under the proposed status contract this
+  means every unsorted valid input fails, so the draft cannot be integrated until
+  real strategy calls replace those placeholders.
+- **Resume with:** have the learner explain the `1`/`0` meaning, then preserve this as
+  a non-integrated draft and return to choosing the simple strategy.
+- **Dispatcher status understood:** the learner traced a `0` return into `main`'s
+  `!ok` branch and correctly concluded that it would print `Error\n`. This confirms
+  `1` as success and `0` as failure; the draft remains outside the build until real
+  strategy calls replace its unsorted placeholders.
+- **Resume with:** compare, trace, and choose the O(n²) simple strategy.
+- **Organization review:** numeric parsing was renamed and its private syntax helper
+  made static; specialized node/list helpers were consolidated and the constructor
+  renamed `ps_lstnew`; rank, disorder, sortedness, and strategy resolution now share
+  `stack_analysis.c`. A fresh strict build, full source/header Norm, no-relink check,
+  and basic valid/invalid stream smoke checks pass after the moves.
+- **Organization issues to resolve:** `resolve_strategy` is strategy-selection logic,
+  not stack analysis, so its current placement conflicts with the planned cohesive
+  `strategy_dispatch.c`. Also, `operation_linked_lists.c` contains support utilities,
+  not emitted Push_swap operations, so its name is misleading. The tracked generated
+  files `push_swap`, `parser`, and `libft/libft.a` also require an intentional Git
+  hygiene decision rather than being treated as ordinary ignored artifacts.
+- **Resume with:** decide the two module names/placements without changing behavior,
+  then return to the simple-strategy comparison.
+- **Organization recheck:** helper implementations now live cohesively in
+  `stack_utils.c`; `stack_analysis.c` contains only rank/disorder/sortedness; and
+  `resolve_strategy` now sits beside the unintegrated `run_strategy` draft in
+  `strategy_dispatch.c`. Fresh `fclean`/rebuild, active-source strict compilation,
+  standalone dispatcher compilation, no-relink, and parsing/stream smokes pass.
+- **Remaining organization defects:** the old tracked `ps_lstadd_top.c` and
+  `resolve_strategy.c` were emptied rather than removed, so full Norm fails both with
+  `EMPTY_LINE_EOF`; `stack_utils.c` still names `operation_linked_lists.c` in its 42
+  banner. A stale ignored `operation_linked_lists.o` also survived `fclean` only
+  because it predates the renamed Makefile source list. `push_swap.h` publicly
+  declares `resolve_strategy`, but the Makefile excludes its new defining module, so
+  neither resolver nor dispatcher exists in the linked binary. Generated binaries
+  remain tracked and continue to create Git noise.
+- **Resume with:** remove the two empty legacy sources, fix the banner, discard the
+  stale ignored object as housekeeping, and re-run full Norm before strategy work.
+- **Organization cleanup confirmed:** both empty legacy sources and the stale object
+  are gone; `stack_utils.c` has the correct banner; `strategy_dispatch.c` is in the
+  Makefile; and both resolver/dispatcher declarations are public. Fresh `fclean`
+  leaves zero root/libft objects and removes both targets; a strict rebuild, full
+  source/header Norm, symbol check, no-relink check, and existing stream smokes pass.
+- **Remaining repository-hygiene note:** generated binaries are still tracked, so
+  builds modify Git-visible artifacts; this is separate from the now-correct source
+  organization.
+- **Resume with:** return to the minimum-extraction versus insertion-style comparison
+  and choose the simple O(n²) method.

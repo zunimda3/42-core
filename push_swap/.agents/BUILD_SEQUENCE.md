@@ -440,6 +440,43 @@ The learner deferred those sortedness checks. Keep Milestone 4 verification open
 move to the simple-strategy comparison; do not treat implementation review as gate
 evidence.
 
+Before selecting the simple algorithm, the learner wants the strategy dispatcher
+architecture made explicit. Define its responsibilities and main call flow now, but
+do not compile empty strategy stubs or add an unlinkable dispatcher. Leave its return
+type open until strategy allocation/failure behavior is known; then return directly
+to the simple-strategy choice.
+
+The learner created a standalone `strategy_dispatch.c` draft. Its sorted guard and
+effective-strategy resolution are correct, and standalone strict compilation and
+Norm pass. It remains outside the header, Makefile, and main path. Every unsorted
+branch currently returns `0`, which is failure under the proposed status contract;
+do not integrate it until real strategy calls replace these placeholders.
+
+Organization review: parsing and linked-list helper consolidation preserve behavior;
+fresh strict build, full Norm, no-relink, and basic stream smokes pass. Strategy
+resolution was moved into `stack_analysis.c`, which conflicts with the planned
+dispatcher cohesion, and `operation_linked_lists.c` misleadingly uses the operation
+prefix for support utilities. Resolve those names/placements before strategy files.
+
+Recheck after the learner's cleanup: `stack_utils.c`, `stack_analysis.c`, and
+`strategy_dispatch.c` now have cohesive responsibilities. Fresh fclean/rebuild,
+active-source strict compilation, standalone dispatcher compilation, no-relink, and
+stream smokes pass. Full Norm still fails because empty tracked `ps_lstadd_top.c` and
+`resolve_strategy.c` remain, and `stack_utils.c` has the old filename in its banner.
+A stale ignored `operation_linked_lists.o` survived fclean from before the rename;
+remove these leftovers before the simple-strategy comparison.
+
+Final cleanup passes: the empty legacy sources and stale object are gone, the banner
+is corrected, `strategy_dispatch.c` is built, and both public symbols are linked.
+Fresh fclean leaves zero project/libft objects and removes both targets; strict
+rebuild, full Norm, no-relink, symbol presence, and established stream smokes pass.
+Return to the simple-strategy comparison. Generated tracked binaries remain a later
+repository-hygiene decision.
+
+The learner correctly traced `0` through `main`'s `!ok` error path, confirming the
+dispatcher contract: `1` succeeds and `0` reports strategy/allocation failure through
+main. Preserve the draft outside the build and return to the simple-strategy choice.
+
 ### 11. Small-input layer
 
 Add sortedness and focused 0–5 element handling after operations pass. Exhaustively
