@@ -6,7 +6,7 @@
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/05 10:08:44 by z                 #+#    #+#             */
-/*   Updated: 2026/09/07 19:31:57 by z                ###   ########.fr       */
+/*   Updated: 2026/09/08 20:19:16 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,5 +96,8 @@ void				execute_rr(t_context *ctx);
 void				execute_rrr(t_context *ctx);
 
 void				execute_operation(t_context *ctx, t_operation op);
+double				compute_disorder(const t_stack *stack);
+t_strategy			resolve_strategy(t_strategy requested, double disorder);
+int					is_sorted(const t_stack *stack);
 
 #endif

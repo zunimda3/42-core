@@ -393,6 +393,53 @@ sizes below two as disorder zero. Save the initial value. Forced selectors work 
 every valid input; adaptive boundaries are exactly `< 0.2`, `[0.2, 0.5)`, and
 `>= 0.5`.
 
+The learner's `compute_disorder.c` now has the correct all-later-pairs traversal,
+zero-below-two guard, wide integer counters, const node cursors, final floating-point
+division, header declaration, and corrected Makefile entry. The full strict build and
+Norm pass, and an immediate repeated `make` does no work. Run focused read-only checks
+next, including unchanged node/link/top/size assertions. Do not integrate into `main`
+yet.
+
+The learner explicitly deferred that focused harness. Keep it as missing gate
+evidence and integrate the result into `context.initial_disorder` only on the
+successful complete-input path, before any future emitted operation. When a new
+focused harness becomes timely, ask whether to run it now or defer it.
+
+`main` now saves the initial disorder after complete successful parsing and before
+rank assignment or any future operation; strict build, Norm, and no-relink checks
+pass. Resolve adaptive dispatch next without overwriting `context.strategy`, because
+benchmark mode must retain the originally requested strategy identity. Compare a
+pure resolver return value with a separate effective-strategy context field.
+
+Confirmed: use a pure resolver. It accepts the requested strategy and initial
+disorder, returns forced selectors unchanged, and maps adaptive to simple below 0.2,
+medium from 0.2 through below 0.5, and complex from 0.5 upward. It must not mutate
+context or emit operations. Build only this helper/interface slice; strategy calls
+remain unavailable.
+
+The learner implemented the resolver with the exact boundaries and added its
+Makefile entry. Strict build, Norm, and no-relink pass, but `push_swap.h` has no
+resolver declaration yet. Add the prototype before integrating or offering the
+focused boundary-test choice.
+
+The declaration is now present; full strict rebuild, Norm, and no-relink pass. The
+learner deferred the focused forced-mode and exact-boundary checks. Preserve that
+missing evidence and move to the read-only sortedness helper; ask whether to test or
+defer when its focused test phase is reached.
+
+The learner consolidated ranking, disorder, and the new sortedness query into
+`stack_analysis.c`; strict build, Norm, and no-relink pass. The adjacent-order logic
+and umbrella declaration are present, but its node cursor remains mutable. Make that
+cursor const before offering the focused sortedness-test choice.
+
+The cursor is now const. Fresh strict rebuild, file/header Norm, and no-relink pass;
+the sortedness implementation slice is complete. Ask whether to run focused
+empty/single/sorted/reverse and unchanged-structure checks now or defer them.
+
+The learner deferred those sortedness checks. Keep Milestone 4 verification open and
+move to the simple-strategy comparison; do not treat implementation review as gate
+evidence.
+
 ### 11. Small-input layer
 
 Add sortedness and focused 0–5 element handling after operations pass. Exhaustively

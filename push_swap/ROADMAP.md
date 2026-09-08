@@ -16,15 +16,13 @@ update, but it must not edit this file until the learner approves the exact chan
 
 ## Current Focus
 
-- **Milestone:** 4 — disorder, selection, and benchmark foundation
+- **Milestone:** 5 — simple O(n²) strategy
 - **Status:** `LEARNING`
-- **Next small step:** define a read-only disorder function for one stack, using wide
-  inversion/pair counters and returning zero below two nodes; integrate its result
-  before any future emitted operation only after focused checks.
-- **Deferred verification:** add the learner-owned rank suite covering empty, single,
-  sorted, reverse, and mixed stacks while proving values, links, order, top, and size
-  remain unchanged; also add learner-owned 0/1/2/many-node tests for raw swap, push,
-  rotate, and reverse-rotate. Milestone 2 remains `VERIFYING` for memory tooling.
+- **Next small step:** compare minimum-extraction and insertion-style two-stack
+  adaptations, then trace one small input before choosing the baseline strategy.
+- **Deferred verification:** Milestone 4 retains the postponed disorder, resolver,
+  and sortedness checks; also add the learner-owned rank suite and 0/1/2/many-node
+  raw-operation tests. Milestone 2 remains `VERIFYING` for memory tooling.
 - **Confirmed output rule:** suppress wholly ineffective commands; a combined command
   emits/counts once when at least one component changes.
 - **Outstanding team requirement:** the subject requires exactly two learners, but a
@@ -91,8 +89,8 @@ Observed on 2026-09-05:
 | 1 | Interface and architecture decisions | `IMPLEMENTING` | Top-of-stack invariant, node/data representation, ownership, input/flag grammar, operation-emission contract, and module boundaries are documented and explained. |
 | 2 | Build, parsing, and lifetime | `IMPLEMENTING` | Required Makefile rules work without relinking; valid inputs build `a`; all invalid-input families print only `Error\n` to stderr; every error path frees memory. |
 | 3 | Operation engine | `VERIFYING` | All 11 operations pass focused 0/1/2/many-node tests, preserve invariants, emit only allowed stdout lines, and update metrics through one understood contract. |
-| 4 | Disorder, selection, and benchmark foundation | `LEARNING` | Disorder is computed before moves; known cases and 0.2/0.5 boundaries pass; default/forced selectors work; benchmark data stays on stderr and operation data stays on stdout. |
-| 5 | Simple O(n²) strategy | `NOT STARTED` | Learners compare candidates, select and justify one, prove its generated-operation upper bound, and pass forced-strategy correctness tests. |
+| 4 | Disorder, selection, and benchmark foundation | `IMPLEMENTING` | Disorder is computed before moves; known cases and 0.2/0.5 boundaries pass; default/forced selectors work; benchmark data stays on stderr and operation data stays on stdout. |
+| 5 | Simple O(n²) strategy | `LEARNING` | Learners compare candidates, select and justify one, prove its generated-operation upper bound, and pass forced-strategy correctness tests. |
 | 6 | Medium O(n√n) strategy | `NOT STARTED` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
 | 7 | Complex O(n log n) strategy | `NOT STARTED` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
 | 8 | Adaptive strategy | `NOT STARTED` | Low, medium, and high disorder regimes select understood techniques at the exact required boundaries; documentation gives time/space arguments. |
@@ -133,6 +131,7 @@ Do not record a design as final merely because an AI suggested it.
 | Input node construction order | Insert each argument at the top vs. append each argument at the bottom; parser-local tail vs. persistent stack tail | Chose left-to-right bottom insertion with a parser-local tail so the first integer remains the top of `a`, construction is O(n), and `t_stack` keeps only its existing `top` and `size` invariants. Parser work does not count as generated Push_swap operations. | `naamir` |
 | Persistent run-state organization | One program context vs. separate stack, option, disorder, and metrics objects | Chose one caller-owned context to carry both stacks, the selected strategy, benchmark state, initial disorder, and operation counters across parsing, sorting, reporting, and cleanup. This centralizes lifetime and avoids globals. | `naamir` |
 | Strategy representation | Retain the selector string vs. parse once into an enum | Store a `t_strategy` enum in the context, initialized to adaptive before parsing. Valid selectors replace that value, so sorting happens only after complete successful parsing and can dispatch without repeated string comparisons. | `naamir` |
+| Adaptive strategy resolution | Overwrite the requested enum vs. store a second context field vs. return an effective method from a pure resolver | Keep `context.strategy` as the requested mode and use a pure resolver to return the effective simple/medium/complex method. Forced selectors return unchanged; adaptive maps the saved initial disorder at the exact subject boundaries. This preserves truthful benchmark reporting without adding persistent state and generates zero Push_swap operations. | `naamir` |
 | Header boundary | Separate narrow `node.h` beneath `push_swap.h` vs. one project-wide umbrella header | Chose one `push_swap.h` containing node, stack, strategy, context, and all project prototypes; removed `node.h` and made every source include the umbrella. This favors one centralized interface, with the understood consequence that changing it may rebuild every object. | `naamir` |
 | Exact integer conversion | Negative `int` accumulation vs. a guarded positive magnitude in `long long` | Chose the wider positive accumulator for readability. A per-digit pre-check against `INT_MAX` or the magnitude of `INT_MIN` rejects overflow before multiplication, including arbitrarily long tokens; syntax validation remains a separate pass. Conversion is O(k) character work and emits no Push_swap operations. The retained implementation was written by AI at the learner's explicit request; the learner then explained its sign, limit, and rejection behavior. | `naamir` |
 | Duplicate detection | Walk the already-attached nodes of `a` per token vs. copy values into a temporary sorted array | Walk `a` before each allocation: worst-case n(n−1)/2 value comparisons, zero extra allocation, no new allocation-failure mode, and the duplicate is rejected before its node exists, so cleanup paths stay unchanged. The array approach is deferred until rank assignment can justify its own allocation on its own merits. | `naamir` |
@@ -197,7 +196,11 @@ and detaching the penultimate/last pair before installing the last as top; chose
 enum-indexed operation counters and explained how enum constants index numeric
 counter elements; implemented all 11 command handlers and enum dispatch with
 emission/counting colocated in each handler; corrected all mnemonic byte lengths so
-each generated command ends in exactly one newline with no NUL byte |
+each generated command ends in exactly one newline with no NUL byte; chose a pure
+adaptive resolver that preserves the requested strategy enum while returning the
+effective complexity-class method for dispatch and later benchmark reporting;
+consolidated rank/disorder/sortedness work into `stack_analysis.c` and implemented
+the const-correct adjacent-order `is_sorted` query with its public interface |
 | Partner pending | None yet |
 
 ## Latest Session Handoff
@@ -303,5 +306,56 @@ each generated command ends in exactly one newline with no NUL byte |
 - **Open question:** who is the required second learner?
 - **Deferred verification:** learner-owned rank tests for empty, single, sorted,
   reverse, and mixed stacks, including unchanged structural invariants.
-- **Resume with:** implement the smallest no-output internal swap primitive before
-  deciding the later emission and metrics contract.
+- **Disorder implementation begins:** the learner added an untracked
+  `compute_disorder.c`. Its nested traversal covers every later-node pair, returns
+  zero below two nodes, and passes standalone strict compilation and Norm. The learner
+  then changed the counters to `size_t`, made both cursors const, added the prototype,
+  and added the Makefile entry. The filename typo was corrected; the full strict build
+  now succeeds, the function and header pass Norm, and an immediate repeated `make`
+  performs no work.
+- **Resume with:** save the computed disorder on the successful complete-input path,
+  while retaining the postponed focused checks as missing verification evidence.
+- **Test-cadence choice:** the learner explicitly deferred the focused disorder
+  harness and requested that future focused harness phases begin by asking whether
+  to test now or delay. This evidence remains required before Milestone 4 can be
+  `DONE`; proceed meanwhile with saving the initial disorder on successful input.
+- **Initial-disorder integration:** `main` now stores `compute_disorder(&context.a)`
+  only after complete successful parsing and before rank assignment or any future
+  operation. Strict build and Norm pass, and an immediate repeated `make` performs
+  no work. Focused disorder behavior remains deliberately unverified for now.
+- **Resume with:** choose whether adaptive resolution should return an effective
+  strategy without mutation or store a separate effective-strategy field; do not
+  overwrite the requested strategy and lose future benchmark identity.
+- **Adaptive-resolution decision:** use a pure resolver rather than overwriting the
+  requested enum or adding a persistent effective-strategy field. Forced selectors
+  pass through unchanged; adaptive returns a method from the exact disorder regimes.
+- **Resume with:** implement only that resolver, its declaration, and build entry;
+  do not call a sorting strategy that does not exist yet.
+- **Resolver implementation:** `resolve_strategy.c` correctly passes forced modes
+  through and maps adaptive `< 0.2`, `< 0.5`, and the remaining range to simple,
+  medium, and complex. The learner corrected their boundary interpretation against
+  the canonical PDF. The source is in the Makefile; strict build, source/header Norm,
+  and no-relink pass, but the promised public declaration is still missing from
+  `push_swap.h` because the build does not yet call the function externally.
+- **Resume with:** add that declaration before any integration or focused test choice.
+- **Resolver interface complete:** the declaration is now in `push_swap.h`; a full
+  strict rebuild, resolver/header Norm, and immediate no-relink check pass. The
+  learner chose to defer focused forced-mode and exact-0.2/0.5 checks, so resolver
+  correctness remains unverified gate evidence despite the implementation review.
+- **Resume with:** build the smallest read-only sortedness helper before any strategy
+  implementation; ask again when its focused test phase becomes timely.
+- **Stack-analysis consolidation:** the learner replaced separate `assign_ranks.c`
+  and `compute_disorder.c` modules with `stack_analysis.c`, retaining both functions
+  and adding `is_sorted`. The sortedness logic accepts fewer than two nodes, rejects
+  the first descending adjacent pair, and otherwise accepts the stack. The full
+  strict build, file/header Norm, and no-relink check pass. Its public declaration is
+  now present, and the cursor is `const t_node *`, enforcing the intended read-only
+  contract. A fresh strict rebuild, file/header Norm, and no-relink check pass.
+- **Resume with:** ask whether to run focused empty/single/sorted/reverse checks now
+  or explicitly defer them; do not close the verification gate without evidence.
+- **Sortedness verification deferred:** the learner chose not to run the focused
+  harness now. Empty, single, sorted, reverse, and unchanged-structure evidence stays
+  open for Milestone 4. Focus shifts to comparing simple-strategy candidates without
+  treating Milestone 4 as complete.
+- **Resume with:** compare and trace minimum extraction versus insertion-style
+  placement in legal Push_swap operations before selecting the O(n²) baseline.

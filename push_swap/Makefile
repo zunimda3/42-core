@@ -12,12 +12,13 @@ SRCS = ps_lstadd_top.c \
 	   context_init.c \
 	   parser.c \
 	   parse_flags.c \
-	   assign_ranks.c \
 	   operations.c \
 	   execute_operation.c \
 	   operation_a.c \
 	   operation_b.c \
 	   operation_combined.c \
+	   resolve_strategy.c \
+	   stack_analysis.c \
 	   main.c
 OBJS = $(SRCS:.c=.o)
 

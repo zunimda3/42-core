@@ -6,7 +6,7 @@
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/05 09:47:59 by z                 #+#    #+#             */
-/*   Updated: 2026/09/07 16:51:57 by z                ###   ########.fr       */
+/*   Updated: 2026/09/08 19:42:58 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,10 @@ int	main(int argc, char **argv)
 		{
 			ok = parse_numbers(&context, argc, argv, start);
 			if (ok)
+			{
+				context.initial_disorder = compute_disorder(&context.a);
 				assign_ranks(&context.a);
+			}
 		}
 	}
 	if (!ok)

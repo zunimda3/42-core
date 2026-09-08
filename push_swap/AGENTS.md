@@ -40,6 +40,13 @@ next build slice follows the agreed architecture rather than being improvised. R
 and use it silently; do not mention it in learner-facing responses. It is planning
 support, not evidence and not a substitute for `ROADMAP.md` or the subject.
 
+The temporary `.agents/CURRENT_MILESTONE.md` implementation map is a third narrow
+exception. After a milestone is completed and before proposing files for the next
+one, replace it with a compact checklist for that next milestone. If work begins in
+an active milestone without a map, create one before proposing another source file.
+Keep it synchronized as confirmed choices change the plan. It is disposable planning
+support, not completion evidence; never treat unchecked predictions as requirements.
+
 These exceptions do not extend to source files, `SUBJECT.md`, `README.md`, Git
 operations, or configuration.
 
@@ -132,7 +139,11 @@ Use a repeating loop:
 1. Locate the earliest agreed but unimplemented dependency from the build sequence.
 2. Explain only the invariant or C mechanism needed for that slice.
 3. Have the learner build the focused slice.
-4. Compile and run the smallest relevant test.
+4. When a new focused test harness is the next step, ask the learner whether they
+   want to run it now or defer it. If deferred, record the missing evidence and
+   continue only where doing so does not falsely close a verification gate. Routine
+   compilation, Norm, and already-established checks may still run without this
+   choice.
 5. Review the evidence and continue implementing until code or test output exposes a
    genuine missing decision, misconception, or blocker.
 6. Discuss only that newly exposed dependency, record the learner's choice, and
@@ -143,6 +154,27 @@ Do not ask the learner to settle metrics, strategies, or distant interfaces whil
 earlier agreed component can already be implemented and tested. Preserve later open
 questions in the roadmap and internal build reference without making them the current
 conversation.
+
+### Milestone Implementation Map
+
+Before proposing the first source file of a new milestone, consult or create
+`.agents/CURRENT_MILESTONE.md`. Keep it compact and include:
+
+- the milestone gate and immediate dependency order;
+- expected public functions and still-unknown interfaces;
+- a proposed file/module grouping, including likely related functions that should
+  share a file under the Norm limits;
+- existing files that may later be renamed or consolidated, without performing that
+  mutation unless the learner requests it;
+- deferred tests, blockers, and decisions;
+- checkboxes separating implemented, integrated, and verified work.
+
+Consult this map before suggesting any new `.c` file. Prefer adding a related
+function to an accurately named existing module when cohesion and Norm limits allow
+it. If no existing filename honestly describes the group, propose the eventual
+module name and consolidation plan before the learner creates another one-function
+file. Revise the map when implementation exposes a real dependency; do not expand it
+into speculative designs for later milestones.
 
 ### Slice-Transition Snapshot
 
@@ -284,10 +316,13 @@ emission/counting, but require the learners to understand and approve the design
 
 ## Validation Protocol
 
-Use the smallest relevant test first, then increase scope. Available tools include
-`cc`, `make`, and `norminette`. Valgrind and the supplied checker are not currently
-present, so probe rather than assume; use AddressSanitizer/UndefinedBehaviorSanitizer
-as interim diagnostics when compatible with the task.
+Use the smallest relevant test first, then increase scope. Before beginning a new
+focused test harness, ask whether the learner wants to run it now or explicitly
+defer it; preserve deferred coverage in `ROADMAP.md` and revisit it before the
+associated completion gate. Available tools include `cc`, `make`, and `norminette`.
+Valgrind and the supplied checker are not currently present, so probe rather than
+assume; use AddressSanitizer/UndefinedBehaviorSanitizer as interim diagnostics when
+compatible with the task.
 
 Validation must eventually cover:
 
