@@ -45,6 +45,15 @@ completion and must not decide unresolved choices for the learners.
   the top of `a`, `pb` until one maximum remains, then `pa` all nodes. With shortest
   rotations it emits at most `sum(floor(m / 2), m = 2..n) + 2(n - 1)` operations,
   uses O(1) auxiliary space, and avoids the final redundant `pb`/`pa` round trip.
+- The medium strategy uses consecutive rank chunks, `pb` for an in-range top, and
+  otherwise forward-only `ra`, so each chunk makes at most one pass through `a`.
+  Restoration moves the highest remaining rank to the top of `b` with `rb`/`rrb`, applies `pa`, and
+  proceeds downward. `medium.c` groups `void run_medium(t_context *)` with four
+  private helpers, staying at the five-function Norm limit. Its complete generated-
+  operation bound remains open.
+- Medium lookup uses an invariant-based contract: every requested rank/range exists
+  after complete rank assignment and clamped chunk construction, so `run_medium`
+  remains `void` rather than propagating an impossible missing-rank status.
 
 ## Active cursor
 

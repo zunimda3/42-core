@@ -17,6 +17,7 @@ SRCS = stack_utils.c \
 	   stack_analysis.c \
 	   strategy_dispatch.c \
 	   simple.c \
+	   medium.c \
 	   main.c
 OBJS = $(SRCS:.c=.o)
 

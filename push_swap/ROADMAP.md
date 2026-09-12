@@ -17,11 +17,11 @@ update, but it must not edit this file until the learner approves the exact chan
 ## Current Focus
 
 - **Milestone:** 6 — medium O(n√n) strategy
-- **Status:** `LEARNING`
-- **Next small step:** compare rank chunks with block/bucket placement, then trace a
-  small legal-operation example before selecting the medium method.
-- **Deferred verification:** Milestone 5 now includes the learner-deferred focused
-  simple-strategy harness. Milestone 4 retains the postponed disorder, resolver, and
+- **Status:** `IMPLEMENTING`
+- **Next small step:** complete the generated-operation bound in plain terms for the
+  confirmed forward-only chunk push and highest-first restoration phases.
+- **Deferred verification:** Milestones 5 and 6 now include learner-deferred focused
+  simple- and medium-strategy harnesses. Milestone 4 retains the postponed disorder, resolver, and
   sortedness checks; also add the learner-owned rank suite and 0/1/2/many-node raw-
   operation tests. Milestone 2 remains `VERIFYING` for memory tooling.
 - **Confirmed output rule:** suppress wholly ineffective commands; a combined command
@@ -92,7 +92,7 @@ Observed on 2026-09-05:
 | 3 | Operation engine | `VERIFYING` | All 11 operations pass focused 0/1/2/many-node tests, preserve invariants, emit only allowed stdout lines, and update metrics through one understood contract. |
 | 4 | Disorder, selection, and benchmark foundation | `IMPLEMENTING` | Disorder is computed before moves; known cases and 0.2/0.5 boundaries pass; default/forced selectors work; benchmark data stays on stderr and operation data stays on stdout. |
 | 5 | Simple O(n²) strategy | `VERIFYING` | Learners compare candidates, select and justify one, prove its generated-operation upper bound, and pass forced-strategy correctness tests. |
-| 6 | Medium O(n√n) strategy | `LEARNING` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
+| 6 | Medium O(n√n) strategy | `IMPLEMENTING` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
 | 7 | Complex O(n log n) strategy | `NOT STARTED` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
 | 8 | Adaptive strategy | `NOT STARTED` | Low, medium, and high disorder regimes select understood techniques at the exact required boundaries; documentation gives time/space arguments. |
 | 9 | Integration and optimization | `NOT STARTED` | Every forced mode and adaptive mode sorts edge, patterned, and randomized inputs; Norm, memory, stream, relink, benchmark-count, and 100/500 performance checks pass. |
@@ -147,7 +147,8 @@ this is a learner-confirmed reading of the subject's unspecified corner. | `naam
 | Operation wrapper organization | Shared emitter vs. emission/counting inside each command handler | Chose separate handlers for all 11 commands with mutation, stdout emission, and the matching individual/total increments colocated in each handler; `execute_operation` performs enum dispatch. This fits the Norm file/function limits and is direct, with the accepted maintenance risk that every handler must independently preserve mnemonic length and counter consistency. | `naamir` |
 | Strategy dispatcher sequencing | Implement strategies first vs. compile empty strategy stubs vs. define dispatcher architecture first | Define the dispatcher contract and complete call flow before building the simple strategy, so later work has a clear integration target. `run_strategy` returns `1` on success and `0` on a strategy/allocation failure; `main` owns `Error\n`. Do not compile empty strategy bodies: they would make valid unsorted input follow the error path or silently remain unsorted. Add the dispatcher source only when real callees make it a useful compilable slice. | `naamir` |
 | Simple strategy | Minimum extraction vs. insertion-style ordered placement | Repeatedly move the smallest remaining rank to the top of `a` and `pb` it until `a.size == 1`, then `pa` all extracted nodes. The last node is the maximum rank; `b` is descending from top to bottom, so restoration makes `a` ascending. With shortest-direction rotation, the generated-operation bound is `sum(floor(m / 2), m = 2..n) + 2(n - 1)`, hence O(n²), with O(1) auxiliary space. | `naamir` |
-| Medium strategy | Pending | Pending | Pending |
+| Medium strategy (method) | Rank chunks vs. block/bucket placement; within chunking, nearest-member extraction vs. forward-only scanning | Chose consecutive rank chunks of size ~√n with forward-only scanning: `pb` when the top belongs to the current chunk and otherwise `ra`. This may emit more operations than nearest-member extraction on some layouts, but each chunk makes at most one forward pass, giving a simple worst-case argument. Restore by rotating the highest remaining rank in the active chunk to the top of `b` and applying `pa`; the full bound still needs learner explanation. | `naamir` |
+| Medium missing-rank contract | Propagate a `-1` lookup failure vs. require every requested rank to exist | Treat a missing requested rank as outside the strategy's valid internal state. Complete unique ranks, clamped chunk bounds, a complete push phase, and highest-first restoration guarantee each lookup target exists; `run_medium` therefore remains `void` and does not add an internal error path. The lookup result must still be initialized so the C function has defined behavior. | `naamir` |
 | Complex strategy | Pending | Pending | Pending |
 | Adaptive internal methods | Pending | Pending | Pending |
 
@@ -489,3 +490,50 @@ restoration with `pa`, and the dispatcher's successful simple branch; connected
   moves to `VERIFYING`, not `DONE`.
 - **Resume with:** begin Milestone 6 by comparing understandable O(n√n) candidates;
   do not propose a medium source file until the learner selects and traces a method.
+- **Medium restoration rule understood:** the learner identified that restoration
+  must move the highest remaining rank first and confirmed the concrete rule: bring
+  each rank to the top of `b` with `rb`/`rrb`, then `pa`, proceeding downward.
+  `medium.c` already contains an unintegrated learner draft of the chunk-push helpers.
+- **Resume with:** implement the focused highest-rank-first restoration helper in
+  `medium.c`; postpone formal notation until the behavior is concrete.
+- **Medium restoration helper implemented:** `restore_from_b` loops while `b` owns
+  nodes, derives the next wanted rank from the shrinking size, chooses `rb` or `rrb`
+  through the shared position helper, and applies one `pa`. Norm passes. Standalone
+  strict compilation now reports only the expected unused-static errors because the
+  public medium coordinator does not exist yet.
+- **Resume with:** implement `run_medium` as the fifth function, preserving the
+  original size for chunk bounds and calling both private phase helpers.
+- **Medium module builds standalone:** learner-authored `run_medium` preserves the
+  original size, chooses a chunk width, clamps the last rank range, pushes every
+  chunk, and restores `b` highest-rank first. `medium.c` now has exactly five
+  functions and passes standalone `-Wall -Wextra -Werror` compilation and Norm.
+  Sorting behavior is not yet test evidence, and the module is not linked.
+- **Resume with:** declare `run_medium`, add `medium.c` to the Makefile, and replace
+  the dispatcher's medium failure placeholder with the real call and success return.
+- **Medium integration and contract choice:** `medium.c` is declared, built, and
+  called by the dispatcher; a full strict build and targeted Norm checks pass. The
+  learner chose to treat a missing requested rank as impossible under the established
+  rank/chunk invariants rather than propagate a failure. The current `best` local is
+  nevertheless uninitialized and must receive a defined value before testing.
+- **Resume with:** initialize the nearest-position result consistently with that
+  precondition, then ask whether to run or defer the focused medium harness.
+- **Medium integration builds cleanly:** the nearest-position helper and both callers
+  now consistently use `size_t`, with a defined initial result under the confirmed
+  must-exist precondition. The full strict build and full project Norm pass; an
+  immediate repeated `make` performs no work and preserves the binary timestamp.
+  No sorting-correctness claim is recorded yet.
+- **Resume with:** ask whether to run the focused medium correctness harness now or
+  explicitly defer it, then retain the full operation-bound explanation as open.
+- **Medium correctness harness deferred:** the learner chose to postpone focused
+  sorting tests. Compilation, Norm, and integration evidence therefore do not yet
+  establish medium correctness.
+- **Resume with:** review the push and restoration operation bounds without heavy
+  notation; do not close Milestone 6 until the deferred harness is revisited.
+- **Forward-only chunk push implemented:** the learner replaced bidirectional nearest-
+  member extraction with `pb` for an in-range top and `ra` otherwise. An initial typo
+  used `pb` in both branches; review exposed that it moved later-chunk nodes without
+  reducing `remaining`. The learner corrected the non-member branch to `ra`. Full
+  strict build, full Norm, and immediate no-relink checks pass; behavior tests remain
+  explicitly deferred.
+- **Resume with:** have the learner explain the plain worst-case operation argument
+  for one-pass chunk pushes and bounded within-chunk restoration.
