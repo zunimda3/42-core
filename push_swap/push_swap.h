@@ -6,7 +6,7 @@
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/05 10:08:44 by z                 #+#    #+#             */
-/*   Updated: 2026/09/08 21:24:36 by z                ###   ########.fr       */
+/*   Updated: 2026/09/12 11:09:35 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,5 +107,7 @@ void				execute_operation(t_context *ctx, t_operation op);
 /* Strategy Dispatch */
 t_strategy			resolve_strategy(t_strategy requested, double disorder);
 int					run_strategy(t_context *ctx);
+
+void				run_simple(t_context *ctx);
 
 #endif

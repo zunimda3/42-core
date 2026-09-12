@@ -6,7 +6,7 @@
 /*   By: z <naamir@42kl.edu.my>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 20:36:33 by z                 #+#    #+#             */
-/*   Updated: 2026/09/08 21:13:54 by z                ###   ########.fr       */
+/*   Updated: 2026/09/12 11:10:45 by z                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,10 @@ int	run_strategy(t_context *ctx)
 		return (1);
 	strategy = resolve_strategy(ctx->strategy, ctx->initial_disorder);
 	if (strategy == STRATEGY_SIMPLE)
-		return (0);
+	{
+		run_simple(ctx);
+		return (1);
+	}
 	else if (strategy == STRATEGY_MEDIUM)
 		return (0);
 	else

@@ -40,7 +40,11 @@ completion and must not decide unresolved choices for the learners.
   operation identifier can drive mutation, output, and counting.
 - Wholly ineffective commands are suppressed because the canonical subject requires
   the smallest generated list; combined commands emit/count once if either side
-  changes. Algorithms remain open.
+  changes. Medium and complex algorithms remain open.
+- The simple strategy uses minimum extraction: rotate the smallest remaining rank to
+  the top of `a`, `pb` until one maximum remains, then `pa` all nodes. With shortest
+  rotations it emits at most `sum(floor(m / 2), m = 2..n) + 2(n - 1)` operations,
+  uses O(1) auxiliary space, and avoids the final redundant `pb`/`pa` round trip.
 
 ## Active cursor
 
@@ -484,10 +488,32 @@ test manageable permutations and require no output for already-sorted inputs.
 
 ### 12. Simple O(n^2)
 
-Compare minimum extraction, insertion-style placement, and bubble-like adaptation.
-Trace legal operations, derive a generated-operation bound, compare space and coding
-risk, then let learners choose. A minimum-extraction baseline is easy to explain but
-is not preselected.
+Minimum extraction is selected and its trace, stopping condition, O(n²) generated-
+operation bound, and O(1) auxiliary space are understood. The second `simple.c` draft
+fixes declaration order, odd-size direction choice, and restoration with `pa`; Norm
+passes. Strict compilation still requires matching the `int` rank type and removing
+one unused local. Prefer checking `a.top` after each `rra` over repeatedly finding the
+tail, and return success from the dispatcher. The learner corrected the rank types,
+top-based reverse loop, and dispatcher return; the strict build now fails only on two
+leftover unused `tail` declarations. Do not integrate through `main` until this slice
+works.
+
+The unused declarations are now gone. Strict full build, full Norm, and immediate
+no-relink checks pass. `run_simple` is connected to the dispatcher's successful
+simple branch, but `main` does not call the dispatcher. Ask whether to run or defer a
+focused simple-strategy harness before that integration.
+
+The learner deferred that harness. Integrate `run_strategy` into the already-successful
+parse/rank block by assigning its return to `ok`, retaining `main` as the only error
+printer and cleanup owner. Keep focused sorting correctness explicitly open.
+
+That integration now strictly builds, but `main` exceeds the Norm 25-line limit.
+Extract only the numeric parse/analyze/sort path into a static helper; leave context
+initialization, the single error write, and both-stack cleanup in `main`.
+
+`prepare_and_sort` now provides that boundary. Strict full build, full Norm, and
+no-relink checks pass. Simple sorting tests remain explicitly deferred, so keep
+Milestone 5 open in verification while beginning medium-strategy comparison.
 
 ### 13. Medium O(n sqrt(n))
 
@@ -529,6 +555,6 @@ gate passes and both learners can explain and modify the implementation.
 - Header and Makefile layout.
 - Duplicate-detection and rank-assignment methods.
 - Metrics representation and no-op emission/counting policy.
-- Simple, medium, and complex methods.
+- Medium and complex methods.
 - Adaptive benchmark naming.
 - Second learner and contribution split.

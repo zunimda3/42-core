@@ -16,14 +16,14 @@ update, but it must not edit this file until the learner approves the exact chan
 
 ## Current Focus
 
-- **Milestone:** 5 — simple O(n²) strategy
+- **Milestone:** 6 — medium O(n√n) strategy
 - **Status:** `LEARNING`
-- **Next small step:** compare minimum extraction and insertion-style placement,
-  trace a small case, and select the real simple strategy that will replace the
-  dispatcher's first failure placeholder.
-- **Deferred verification:** Milestone 4 retains the postponed disorder, resolver,
-  and sortedness checks; also add the learner-owned rank suite and 0/1/2/many-node
-  raw-operation tests. Milestone 2 remains `VERIFYING` for memory tooling.
+- **Next small step:** compare rank chunks with block/bucket placement, then trace a
+  small legal-operation example before selecting the medium method.
+- **Deferred verification:** Milestone 5 now includes the learner-deferred focused
+  simple-strategy harness. Milestone 4 retains the postponed disorder, resolver, and
+  sortedness checks; also add the learner-owned rank suite and 0/1/2/many-node raw-
+  operation tests. Milestone 2 remains `VERIFYING` for memory tooling.
 - **Confirmed output rule:** suppress wholly ineffective commands; a combined command
   emits/counts once when at least one component changes.
 - **Outstanding team requirement:** the subject requires exactly two learners, but a
@@ -91,8 +91,8 @@ Observed on 2026-09-05:
 | 2 | Build, parsing, and lifetime | `IMPLEMENTING` | Required Makefile rules work without relinking; valid inputs build `a`; all invalid-input families print only `Error\n` to stderr; every error path frees memory. |
 | 3 | Operation engine | `VERIFYING` | All 11 operations pass focused 0/1/2/many-node tests, preserve invariants, emit only allowed stdout lines, and update metrics through one understood contract. |
 | 4 | Disorder, selection, and benchmark foundation | `IMPLEMENTING` | Disorder is computed before moves; known cases and 0.2/0.5 boundaries pass; default/forced selectors work; benchmark data stays on stderr and operation data stays on stdout. |
-| 5 | Simple O(n²) strategy | `LEARNING` | Learners compare candidates, select and justify one, prove its generated-operation upper bound, and pass forced-strategy correctness tests. |
-| 6 | Medium O(n√n) strategy | `NOT STARTED` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
+| 5 | Simple O(n²) strategy | `VERIFYING` | Learners compare candidates, select and justify one, prove its generated-operation upper bound, and pass forced-strategy correctness tests. |
+| 6 | Medium O(n√n) strategy | `LEARNING` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
 | 7 | Complex O(n log n) strategy | `NOT STARTED` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
 | 8 | Adaptive strategy | `NOT STARTED` | Low, medium, and high disorder regimes select understood techniques at the exact required boundaries; documentation gives time/space arguments. |
 | 9 | Integration and optimization | `NOT STARTED` | Every forced mode and adaptive mode sorts edge, patterned, and randomized inputs; Norm, memory, stream, relink, benchmark-count, and 100/500 performance checks pass. |
@@ -146,7 +146,7 @@ this is a learner-confirmed reading of the subject's unspecified corner. | `naam
 | No-op emission and counting | Always emit requested commands vs. suppress commands that change no state | The canonical PDF says primitive operations do nothing when their precondition is absent, the strategy output is the operation sequence that sorts, and the program must display the smallest list possible. A wholly ineffective command can always be removed, so it must not be emitted or counted. A combined command emits/counts once if at least one component changes; its two primitives are never counted separately. | `en.subject.pdf` |
 | Operation wrapper organization | Shared emitter vs. emission/counting inside each command handler | Chose separate handlers for all 11 commands with mutation, stdout emission, and the matching individual/total increments colocated in each handler; `execute_operation` performs enum dispatch. This fits the Norm file/function limits and is direct, with the accepted maintenance risk that every handler must independently preserve mnemonic length and counter consistency. | `naamir` |
 | Strategy dispatcher sequencing | Implement strategies first vs. compile empty strategy stubs vs. define dispatcher architecture first | Define the dispatcher contract and complete call flow before building the simple strategy, so later work has a clear integration target. `run_strategy` returns `1` on success and `0` on a strategy/allocation failure; `main` owns `Error\n`. Do not compile empty strategy bodies: they would make valid unsorted input follow the error path or silently remain unsorted. Add the dispatcher source only when real callees make it a useful compilable slice. | `naamir` |
-| Simple strategy | Pending | Pending | Pending |
+| Simple strategy | Minimum extraction vs. insertion-style ordered placement | Repeatedly move the smallest remaining rank to the top of `a` and `pb` it until `a.size == 1`, then `pa` all extracted nodes. The last node is the maximum rank; `b` is descending from top to bottom, so restoration makes `a` ascending. With shortest-direction rotation, the generated-operation bound is `sum(floor(m / 2), m = 2..n) + 2(n - 1)`, hence O(n²), with O(1) auxiliary space. | `naamir` |
 | Medium strategy | Pending | Pending | Pending |
 | Complex strategy | Pending | Pending | Pending |
 | Adaptive internal methods | Pending | Pending | Pending |
@@ -208,7 +208,16 @@ rejecting compiled empty stubs that could masquerade as successful sorting; trac
 the dispatcher's `0` return through `main`'s `!ok` branch and confirmed the shared
 success/failure contract; reorganized numeric parsing into `parse_numbers.c`, merged
 specialized node/list helpers into `stack_utils.c`, grouped resolution/dispatch in
-`strategy_dispatch.c`, and synchronized the public declarations and Makefile sources |
+`strategy_dispatch.c`, and synchronized the public declarations and Makefile sources;
+traced minimum extraction on `[3, 1, 4, 2]`, identified the redundant final
+`pb`/`pa` round trip, and selected minimum extraction as the simple strategy because
+the sole node left in `a` is the maximum rank while `b` restores in sorted order;
+wrote the first `simple.c` implementation draft with rank-position search,
+direction selection, and extraction through the existing operation wrappers;
+completed the minimum-extraction entry point, including shortest-direction movement,
+restoration with `pa`, and the dispatcher's successful simple branch; connected
+`run_strategy` to the successful parse/rank path in `main`; extracted
+`prepare_and_sort` so the integrated entry path remains within the Norm line limit |
 | Partner pending | None yet |
 
 ## Latest Session Handoff
@@ -425,3 +434,58 @@ specialized node/list helpers into `stack_utils.c`, grouped resolution/dispatch 
   organization.
 - **Resume with:** return to the minimum-extraction versus insertion-style comparison
   and choose the simple O(n²) method.
+- **Simple-strategy decision:** the learner selected minimum extraction over
+  insertion-style placement. On `[3, 1, 4, 2]`, the learner produced a correct
+  sorting trace, then explained why extraction stops at `a.size == 1`: after all
+  smaller ranks have moved to `b`, the remaining node is the maximum and need not
+  take a redundant `pb`/`pa` round trip. `b` is descending top-to-bottom, so repeated
+  `pa` reconstructs ascending `a`.
+- **Resume with:** design and implement the minimum-position/rotation slice in
+  `simple_sort.c`, then connect the real simple target to the dispatcher.
+- **First simple-strategy draft:** `simple.c` now searches for each wanted rank and
+  calls the existing operation wrappers. Norm passes, but strict compilation rejects
+  the order of `static`, signed/unsigned rank comparisons, and an unused local. Review
+  also found that the reverse branch keeps a stale tail pointer and can loop forever,
+  odd-sized midpoint selection may choose the longer direction, restoration with
+  `pa` is missing, and the dispatcher currently reports `0` after `run_simple`.
+- **Resume with:** have the learner correct those focused issues before integration or
+  strategy testing; `main` still does not call `run_strategy`.
+- **Second simple-strategy draft:** the learner corrected `static` placement, the
+  odd-size direction choice, and restoration from `b` with `pa`. The revised reverse
+  branch now refreshes its tail and is logically able to reach the wanted rank, but
+  it is more complicated than checking `a.top` after each `rra`. Strict compilation
+  still rejects three signed/unsigned rank comparisons and the unused `tail` local in
+  `run_simple`; Norm remains clean. The dispatcher still returns failure after the
+  simple strategy.
+- **Resume with:** make those remaining small corrections, then rerun strict
+  compilation before any focused strategy harness.
+- **Third simple-strategy draft:** rank types, top-based reverse rotation, and the
+  dispatcher's success return are corrected, and full Norm passes. The strict build
+  now fails only because unused `tail` declarations remain in both `push_to_b` and
+  `run_simple`; no focused strategy test has started.
+- **Simple strategy builds:** both unused declarations are removed. A strict full
+  build succeeds, full source/header Norm passes, and an immediate repeated `make`
+  performs no work while preserving the binary timestamp. Code review shows the
+  extraction/restoration flow is complete; correctness on actual stacks remains
+  unverified because the focused harness has not yet been chosen or run.
+- **Resume with:** ask whether to run the focused strategy harness now or defer it;
+  do not treat compilation and Norm as sorting evidence.
+- **Test-cadence choice:** the learner deferred the focused simple-strategy harness.
+  Sorting correctness remains open; proceed only with dispatcher integration and do
+  not mark Milestone 5 verified from compilation alone.
+- **Resume with:** assign `ok = run_strategy(&context)` after successful ranking in
+  `main`, preserving the existing single error-output and cleanup path.
+- **Main integration:** `main` now assigns the dispatcher result to `ok` after saving
+  disorder and assigning ranks. The strict build succeeds, but Norm reports
+  `TOO_MANY_LINES` because `main` is now over 25 lines. Behavior has not been focused-
+  tested because the learner deferred that harness.
+- **Resume with:** extract the successful numeric-input preparation/sort path into a
+  static helper without changing ownership, output, or flags-only behavior.
+- **Main refactor complete:** learner-authored `prepare_and_sort` now owns numeric
+  parsing, disorder capture, rank assignment, and strategy execution while `main`
+  retains initialization, error output, and cleanup. Strict full build and full Norm
+  pass; an immediate repeated `make` performs no work and preserves the binary
+  timestamp. The deferred simple-strategy harness remains required, so Milestone 5
+  moves to `VERIFYING`, not `DONE`.
+- **Resume with:** begin Milestone 6 by comparing understandable O(n√n) candidates;
+  do not propose a medium source file until the learner selects and traces a method.
