@@ -1,44 +1,75 @@
 # Current Milestone Implementation Map
 
-## Milestone 6 — Medium O(n√n) strategy
+## Milestone 8 — Adaptive strategy
 
-Gate: compare viable methods, choose and justify one, derive an O(n√n) generated-
-operation bound, and eventually pass forced-medium correctness and scaling tests.
+Gate: initial disorder selects the required internal method at the exact boundaries;
+forced modes remain unchanged, benchmark reporting is truthful, and focused regime
+tests pass.
 
 ## Dependency order
 
-- [x] Compare rank chunks with block/bucket placement using legal operations.
-- [x] Trace a small example and explain the stack order being maintained
-  (7-value trace; `b` ends chunk-ordered: descending between chunks, arbitrary
-  within).
-- [x] Choose the restoration mechanism: highest remaining rank to the top of `b`,
-  then `pa`, proceeding downward.
-- [x] Implement the private restoration helper (Norm-clean; not yet called or
-  integrated).
-- [ ] Derive the full generated-operation bound.
-- [x] Record the learner's chosen method and rationale.
-- [x] Decide the public entry point and cohesive grouping: `void run_medium` plus
-  four private helpers in `medium.c` (five functions total).
-- [x] Implement the standalone medium module; strict compilation and Norm pass.
-- [x] Declare, build, and connect the real medium dispatcher target; strict build
-  and targeted Norm checks pass.
-- [x] Focused medium tests explicitly deferred by the learner.
+- [x] Compute and save disorder before rank assignment or generated moves.
+- [x] Preserve forced selectors through a pure resolver.
+- [x] Map adaptive `< 0.2` to simple, `< 0.5` to medium, and the rest to complex.
+- [x] Explain that exact `0.20` selects medium and exact `0.50` selects complex.
+- [x] Explain forced pass-through versus adaptive resolution at the same disorder.
+- [x] Explain why the requested strategy must not be overwritten by the effective
+  method.
+- [x] Dispatch the existing simple and medium methods.
+- [x] Place conditional benchmark reporting inside `prepare_and_sort` after
+  successful strategy execution.
+- [x] Choose `void print_benchmark(const t_context *ctx)` as the reporter interface.
+- [x] Explain direct-field protection through the `const t_context *` parameter.
+- [x] Choose narrow benchmark-local numeric helpers over adapting `ft_printf`.
+- [x] Begin `bench.c` with the private recursive writer and public total reporter;
+  standalone strict compilation and Norm pass.
+- [x] Correct the emitted digit storage to one `char`; strict standalone compilation
+  and Norm pass.
+- [x] Explain the one-byte `write` contract; focused full-width/stderr harness
+  explicitly deferred.
+- [x] Draft scaled disorder output with whole/fractional separation and zero padding.
+- [x] Extract `print_disorder`, round with `+ 0.5`, and emit the `%` suffix.
+- [x] Move the scaled calculation before its first read; strict standalone
+  compilation and Norm pass.
+- [x] Draft requested-strategy name and effective-complexity reporting.
+- [x] Call the strategy helper, branch on the resolved enum, and correct separator
+  spacing; strict standalone compilation and Norm pass.
+- [x] Draft the correct label-to-enum mapping for all 11 operation counts.
+- [x] Complete the fifth/final helper's enum-indexed two-line output loop, keep it
+  private, and call it after `total_ops`; strict standalone compilation and Norm pass.
+- [ ] Learner explains the enum/label mapping and two-line boundary invariant.
+- [ ] Declare, build, and conditionally call the completed reporter.
+- [ ] Integrate the second learner's complex method into the high-disorder branch.
+- [ ] Report the requested/effective adaptive strategy truthfully in benchmark mode.
+- [ ] Run exact-boundary, forced-mode, stream, and regime correctness tests.
+- [ ] Document the threshold rationale and internal complexity/space bounds.
 
-## Expected interfaces and grouping
+## Expected interface and grouping
 
-- One public `void run_medium(t_context *ctx)`; it has no allocation/failure path.
-- Nearest-member lookup requires that the requested rank/range exists; missing-rank
-  propagation is intentionally outside the valid internal contract.
-- Reuse fixed ranks and existing operation wrappers.
-- Do not add a medium source file until the method and its helper needs are chosen.
-- Keep `strategy_dispatch.c` as the central selection point.
+- Existing `resolve_strategy(t_strategy, double)` is pure and returns the effective
+  method without mutating the requested strategy.
+- Existing `run_strategy(t_context *)` resolves after disorder capture and dispatches
+  simple/medium; complex currently follows the failure return.
+- Benchmark reporter uses one read-only context and resolves the effective method
+  from its retained requested strategy plus initial disorder.
+- Active `bench.c` grouping: a full-width `size_t` writer, disorder formatter,
+  strategy/class formatter, metric-loop formatter, and public reporter (five
+  functions). The first writer/reporter slice exists but is not integrated.
+- The learner's external `ft_printf` is allowed but currently writes only to fd 1
+  and lacks `%f`/`%zu`; unchanged reuse is incompatible with benchmark requirements.
+- Confirmed: retain narrow local stderr formatting helpers; do not import or expand
+  the earlier formatter.
+- The previously observed untracked `ft_printf/` copy is no longer present; the
+  assistant did not remove it.
+- Keep resolution and dispatch cohesive in `strategy_dispatch.c`; no new adaptive
+  source file is currently justified.
 
-## Deferred evidence and decisions
+## Deferred evidence and paused work
 
-- Method chosen: forward-only rank-chunk scanning (`pb` for a member, otherwise
-  `ra`), followed by highest-rank-first restoration using `rb`/`rrb` and `pa`.
-  The full bound remains open.
-- Milestone 5's focused simple-strategy harness remains learner-deferred.
-- Milestone 6's focused medium correctness harness is also learner-deferred.
+- Complex implementation is provisionally assigned to the second learner, whose
+  identity and contribution remain unconfirmed; Milestone 7 stays `LEARNING`.
+- Simple and medium correctness/scaling harnesses remain learner-deferred; Milestones
+  5 and 6 stay `VERIFYING`.
+- Benchmark full-width counter and stderr-output evidence is learner-deferred.
 - Milestone 4 analysis/resolver/sortedness tests and earlier operation/rank tests also
   remain deferred.

@@ -47,13 +47,53 @@ completion and must not decide unresolved choices for the learners.
   uses O(1) auxiliary space, and avoids the final redundant `pb`/`pa` round trip.
 - The medium strategy uses consecutive rank chunks, `pb` for an in-range top, and
   otherwise forward-only `ra`, so each chunk makes at most one pass through `a`.
-  Restoration moves the highest remaining rank to the top of `b` with `rb`/`rrb`, applies `pa`, and
-  proceeds downward. `medium.c` groups `void run_medium(t_context *)` with four
-  private helpers, staying at the five-function Norm limit. Its complete generated-
-  operation bound remains open.
+  Restoration moves the highest remaining rank to the top of `b` with `rb`/`rrb`,
+  applies `pa`, and proceeds downward. With width `w = ceil(√n)`, pushing is bounded
+  by `n ceil(n / w)` and restoration by `n(w + 1)` because the active chunk remains
+  at the outer ends of `b`; together this is O(n√n) generated operations. `medium.c`
+  groups `void run_medium(t_context *)` with four private helpers, staying at the
+  five-function Norm limit.
 - Medium lookup uses an invariant-based contract: every requested rank/range exists
   after complete rank assignment and clamped chunk construction, so `run_medium`
   remains `void` rather than propagating an impossible missing-rank status.
+- Complex-strategy implementation is provisionally assigned to the second learner;
+  the partner, method, interface, and evidence remain open. Adaptive high-disorder
+  execution therefore remains unavailable.
+- Benchmark reporting is called conditionally inside `prepare_and_sort` only after
+  successful strategy execution. Parse/strategy failures and flags-only runs do not
+  report; `main` retains error output and cleanup ownership.
+- The benchmark reporter takes one `const t_context *`, using the cohesive run-state
+  snapshot while preventing direct context-field mutation through its parameter.
+- Benchmark numeric output uses narrow fd-aware helpers rather than expanding the
+  learner's stdout-only `ft_printf`; preserve full `size_t` range and format disorder
+  through a scaled integer with two decimal digits.
+- `bench.c` now has an unintegrated recursive `size_t` writer and public total-line
+  reporter. The emitted digit uses `char`, while the source value remains `size_t`;
+  strict standalone compilation and Norm pass. The learner explained the one-byte
+  contract and deferred focused full-width/stderr output evidence.
+- The first disorder block correctly splits whole/fractional digits and pads a
+  one-digit fraction, but must add `+ 0.5`, emit `%`, and move into its planned
+  private helper before strategy/metric fields expand the public reporter.
+- `print_disorder` is now extracted and includes rounding/percent output, but strict
+  compilation catches `scaled / 100` before `scaled` is assigned. Move the existing
+  calculation before both reads; do not initialize it to a semantically wrong zero.
+- The scaled calculation now precedes both reads; the unintegrated disorder/total
+  reporter passes strict standalone compilation and Norm. Captured stderr behavior
+  remains learner-deferred. Add requested-name/effective-complexity reporting next.
+- The first private strategy reporter is present but uncalled, so strict compilation
+  rejects it as unused. Its complexity branches also test the requested enum instead
+  of the resolved enum, and its separator lacks a leading space. Correct those three
+  points before metric reporting.
+- Strategy reporting now cleanly separates requested name from resolved complexity,
+  is called in subject order, and passes strict standalone compilation and Norm.
+  Add all 11 enum-indexed counts as the fifth/final `bench.c` function next.
+- The learner drafted the correct 11-name mapping but no counter loop; strict
+  compilation rejects the unused context parameter. Complete it with one local const
+  label table and enum-indexed loop, keep it private, then call it after total output.
+- At the learner's explicit request, the duplicate draft was removed and the private
+  enum-indexed counter loop plus coordinator call were completed. `bench.c` has five
+  functions and passes strict standalone compilation and Norm; integration and
+  captured stream evidence remain open.
 
 ## Active cursor
 

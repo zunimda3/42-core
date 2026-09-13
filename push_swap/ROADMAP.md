@@ -16,18 +16,21 @@ update, but it must not edit this file until the learner approves the exact chan
 
 ## Current Focus
 
-- **Milestone:** 6 — medium O(n√n) strategy
+- **Milestone:** 8 — adaptive strategy
 - **Status:** `IMPLEMENTING`
-- **Next small step:** complete the generated-operation bound in plain terms for the
-  confirmed forward-only chunk push and highest-first restoration phases.
-- **Deferred verification:** Milestones 5 and 6 now include learner-deferred focused
-  simple- and medium-strategy harnesses. Milestone 4 retains the postponed disorder, resolver, and
+- **Next small step:** have the learner explain the counter loop's enum/label
+  invariant, then explicitly authorize or perform the separate header/Makefile/main
+  integration slice when ready.
+- **Deferred verification:** Milestones 5 and 6 include learner-deferred focused
+  simple- and medium-strategy harnesses; the benchmark `size_t`/stderr harness is now
+  also deferred. Milestone 4 retains the postponed disorder, resolver, and
   sortedness checks; also add the learner-owned rank suite and 0/1/2/many-node raw-
   operation tests. Milestone 2 remains `VERIFYING` for memory tooling.
 - **Confirmed output rule:** suppress wholly ineffective commands; a combined command
   emits/counts once when at least one component changes.
-- **Outstanding team requirement:** the subject requires exactly two learners, but a
-  partner has not yet been confirmed; this does not block architecture learning.
+- **Outstanding team requirement:** the learner intends the second learner to own
+  complex-strategy implementation, but that partner and contribution are not yet
+  confirmed. Both learners must still understand and defend every algorithm.
 
 ## Current Repository Baseline
 
@@ -92,9 +95,9 @@ Observed on 2026-09-05:
 | 3 | Operation engine | `VERIFYING` | All 11 operations pass focused 0/1/2/many-node tests, preserve invariants, emit only allowed stdout lines, and update metrics through one understood contract. |
 | 4 | Disorder, selection, and benchmark foundation | `IMPLEMENTING` | Disorder is computed before moves; known cases and 0.2/0.5 boundaries pass; default/forced selectors work; benchmark data stays on stderr and operation data stays on stdout. |
 | 5 | Simple O(n²) strategy | `VERIFYING` | Learners compare candidates, select and justify one, prove its generated-operation upper bound, and pass forced-strategy correctness tests. |
-| 6 | Medium O(n√n) strategy | `IMPLEMENTING` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
-| 7 | Complex O(n log n) strategy | `NOT STARTED` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
-| 8 | Adaptive strategy | `NOT STARTED` | Low, medium, and high disorder regimes select understood techniques at the exact required boundaries; documentation gives time/space arguments. |
+| 6 | Medium O(n√n) strategy | `VERIFYING` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
+| 7 | Complex O(n log n) strategy | `LEARNING` | Learners compare candidates, select and justify one, prove its operation upper bound, and pass forced-strategy correctness and scaling tests. |
+| 8 | Adaptive strategy | `IMPLEMENTING` | Low, medium, and high disorder regimes select understood techniques at the exact required boundaries; documentation gives time/space arguments. |
 | 9 | Integration and optimization | `NOT STARTED` | Every forced mode and adaptive mode sorts edge, patterned, and randomized inputs; Norm, memory, stream, relink, benchmark-count, and 100/500 performance checks pass. |
 | 10 | README and defense readiness | `NOT STARTED` | Required first line and sections exist; algorithms, resources, AI use, and both contributions are accurate; both learners can explain or modify any area. |
 | 11 | Bonus checker | `LOCKED` | Unlock only after every mandatory correctness, Norm, memory, Makefile, and benchmark gate passes. |
@@ -133,6 +136,9 @@ Do not record a design as final merely because an AI suggested it.
 | Persistent run-state organization | One program context vs. separate stack, option, disorder, and metrics objects | Chose one caller-owned context to carry both stacks, the selected strategy, benchmark state, initial disorder, and operation counters across parsing, sorting, reporting, and cleanup. This centralizes lifetime and avoids globals. | `naamir` |
 | Strategy representation | Retain the selector string vs. parse once into an enum | Store a `t_strategy` enum in the context, initialized to adaptive before parsing. Valid selectors replace that value, so sorting happens only after complete successful parsing and can dispatch without repeated string comparisons. | `naamir` |
 | Adaptive strategy resolution | Overwrite the requested enum vs. store a second context field vs. return an effective method from a pure resolver | Keep `context.strategy` as the requested mode and use a pure resolver to return the effective simple/medium/complex method. Forced selectors return unchanged; adaptive maps the saved initial disorder at the exact subject boundaries. This preserves truthful benchmark reporting without adding persistent state and generates zero Push_swap operations. | `naamir` |
+| Benchmark reporting boundary | Call after `prepare_and_sort` in `main` vs. call inside `prepare_and_sort` after successful strategy execution | Place the conditional benchmark call inside `prepare_and_sort`, after `run_strategy` succeeds. Invalid parsing and failed strategies return before reporting, flags-only runs never enter the helper, and successful operation output is complete before benchmark text is written to stderr. `main` remains responsible for `Error\n` and cleanup. | `naamir` |
+| Benchmark reporter interface | Pass requested/effective/disorder/counters individually vs. pass one read-only context | Use `void print_benchmark(const t_context *ctx)`. Benchmark reporting consumes one cohesive run-state snapshot, `const` prevents modification of the context fields through that parameter, and the reporter can resolve the effective method from the retained requested strategy and initial disorder. This accepts coupling to the context in exchange for avoiding a long, mismatch-prone argument list. | `naamir` |
+| Benchmark numeric output | Expand the learner's existing `ft_printf` for fd/`size_t`/fixed-point support vs. use narrow benchmark-only writers | Keep narrow fd-aware helpers in the Push_swap benchmark module. The existing formatter is permitted but hardcodes stdout and lacks `%f`/`%zu`; adapting its full conversion pipeline would enlarge the slice. A recursive `size_t` writer plus scaled-integer disorder formatting directly covers the required stderr report without narrowing counters to `int`. | `naamir` |
 | Header boundary | Separate narrow `node.h` beneath `push_swap.h` vs. one project-wide umbrella header | Chose one `push_swap.h` containing node, stack, strategy, context, and all project prototypes; removed `node.h` and made every source include the umbrella. This favors one centralized interface, with the understood consequence that changing it may rebuild every object. | `naamir` |
 | Exact integer conversion | Negative `int` accumulation vs. a guarded positive magnitude in `long long` | Chose the wider positive accumulator for readability. A per-digit pre-check against `INT_MAX` or the magnitude of `INT_MIN` rejects overflow before multiplication, including arbitrarily long tokens; syntax validation remains a separate pass. Conversion is O(k) character work and emits no Push_swap operations. The retained implementation was written by AI at the learner's explicit request; the learner then explained its sign, limit, and rejection behavior. | `naamir` |
 | Duplicate detection | Walk the already-attached nodes of `a` per token vs. copy values into a temporary sorted array | Walk `a` before each allocation: worst-case n(n−1)/2 value comparisons, zero extra allocation, no new allocation-failure mode, and the duplicate is rejected before its node exists, so cleanup paths stay unchanged. The array approach is deferred until rank assignment can justify its own allocation on its own merits. | `naamir` |
@@ -147,9 +153,9 @@ this is a learner-confirmed reading of the subject's unspecified corner. | `naam
 | Operation wrapper organization | Shared emitter vs. emission/counting inside each command handler | Chose separate handlers for all 11 commands with mutation, stdout emission, and the matching individual/total increments colocated in each handler; `execute_operation` performs enum dispatch. This fits the Norm file/function limits and is direct, with the accepted maintenance risk that every handler must independently preserve mnemonic length and counter consistency. | `naamir` |
 | Strategy dispatcher sequencing | Implement strategies first vs. compile empty strategy stubs vs. define dispatcher architecture first | Define the dispatcher contract and complete call flow before building the simple strategy, so later work has a clear integration target. `run_strategy` returns `1` on success and `0` on a strategy/allocation failure; `main` owns `Error\n`. Do not compile empty strategy bodies: they would make valid unsorted input follow the error path or silently remain unsorted. Add the dispatcher source only when real callees make it a useful compilable slice. | `naamir` |
 | Simple strategy | Minimum extraction vs. insertion-style ordered placement | Repeatedly move the smallest remaining rank to the top of `a` and `pb` it until `a.size == 1`, then `pa` all extracted nodes. The last node is the maximum rank; `b` is descending from top to bottom, so restoration makes `a` ascending. With shortest-direction rotation, the generated-operation bound is `sum(floor(m / 2), m = 2..n) + 2(n - 1)`, hence O(n²), with O(1) auxiliary space. | `naamir` |
-| Medium strategy (method) | Rank chunks vs. block/bucket placement; within chunking, nearest-member extraction vs. forward-only scanning | Chose consecutive rank chunks of size ~√n with forward-only scanning: `pb` when the top belongs to the current chunk and otherwise `ra`. This may emit more operations than nearest-member extraction on some layouts, but each chunk makes at most one forward pass, giving a simple worst-case argument. Restore by rotating the highest remaining rank in the active chunk to the top of `b` and applying `pa`; the full bound still needs learner explanation. | `naamir` |
+| Medium strategy (method) | Rank chunks vs. block/bucket placement; within chunking, nearest-member extraction vs. forward-only scanning | Chose consecutive rank chunks of width `w = ceil(√n)` with forward-only scanning: `pb` when the top belongs to the current chunk and otherwise `ra`. There are `ceil(n / w)` chunks and each makes at most one pass through the current `a`, so pushing costs at most `n ceil(n / w)`. During restoration the active chunk remains at the outer ends of `b`; its next-highest rank is reachable with at most about `w` rotations, followed by one `pa`, so restoration costs at most `n(w + 1)`. With `w ~ √n`, the combined generated-operation bound is O(n√n), using O(1) auxiliary space. | `naamir` |
 | Medium missing-rank contract | Propagate a `-1` lookup failure vs. require every requested rank to exist | Treat a missing requested rank as outside the strategy's valid internal state. Complete unique ranks, clamped chunk bounds, a complete push phase, and highest-first restoration guarantee each lookup target exists; `run_medium` therefore remains `void` and does not add an internal error path. The lookup result must still be initialized so the C function has defined behavior. | `naamir` |
-| Complex strategy | Pending | Pending | Pending |
+| Complex strategy | Self-implementation now vs. hand implementation to the second learner | `naamir` chose to skip the complex implementation slice and reserve it for the second learner. The method, bound, implementation evidence, and partner identity remain unconfirmed; this division does not remove either learner's obligation to understand and defend the final algorithm. | `naamir` |
 | Adaptive internal methods | Pending | Pending | Pending |
 
 ## Contribution Record
@@ -218,7 +224,32 @@ direction selection, and extraction through the existing operation wrappers;
 completed the minimum-extraction entry point, including shortest-direction movement,
 restoration with `pa`, and the dispatcher's successful simple branch; connected
 `run_strategy` to the successful parse/rank path in `main`; extracted
-`prepare_and_sort` so the integrated entry path remains within the Norm line limit |
+`prepare_and_sort` so the integrated entry path remains within the Norm line limit;
+explained that minimum extraction has `n - 1` rounds and each round may use up to
+`floor(m / 2)` rotations to bring its wanted rank to the top, so repeated linear-
+sized rotation work gives O(n²) generated operations;
+explained the medium-strategy bound in plain terms: about √n chunks each make at most
+one pass through `a`, while the active restoration chunk remains at the outer ends
+of `b`, keeping each highest-rank lookup within about one chunk width; interpreted
+the exact adaptive boundaries correctly: disorder `0.20` selects medium and `0.50`
+selects complex; distinguished adaptive resolution from forced pass-through by
+explaining that at disorder `0.80`, `--adaptive` resolves to complex while
+`--medium` remains medium; explained that overwriting `ctx->strategy` would lose the
+requested-versus-effective distinction needed for truthful adaptive reporting;
+placed conditional benchmark reporting inside `prepare_and_sort` after successful
+strategy execution so failures and flags-only runs cannot report; selected one
+`const t_context *` benchmark argument to expose the cohesive run snapshot without
+allowing its direct fields to be modified through the reporter parameter; explained
+that incrementing a counter through this pointer is rejected because the context is
+read-only through that access path; chose narrow benchmark-only numeric helpers over
+expanding the earlier `ft_printf` conversion pipeline; implemented the first
+`bench.c` slice with a recursive counter writer and total-report coordinator;
+explained that the `char` digit matches the single byte requested from `write`;
+implemented the extracted rounded two-decimal disorder formatter and corrected its
+calculation to precede every read; implemented requested-strategy/effective-
+complexity benchmark reporting with correct adaptive behavior and UTF-8 byte counts;
+explicitly requested AI completion of the private enum-indexed counter loop and its
+coordinator call after reporting being blocked on that translation |
 | Partner pending | None yet |
 
 ## Latest Session Handoff
@@ -537,3 +568,187 @@ restoration with `pa`, and the dispatcher's successful simple branch; connected
   explicitly deferred.
 - **Resume with:** have the learner explain the plain worst-case operation argument
   for one-pass chunk pushes and bounded within-chunk restoration.
+- **Medium operation bound explained:** with `w = ceil(√n)`, there are about √n
+  chunks and each push chunk makes at most one pass through the current `a`. During
+  restoration, the learner explained that an active chunk may lie at the top or
+  bottom of `b` but its next member stays within at most about `w` `rb`/`rrb`
+  rotations. Adding one `pa` per node gives `n ceil(n / w) + n(w + 1)`, hence
+  O(n√n) generated operations. Milestone 6 moves to `VERIFYING`; the previously
+  deferred focused correctness/scaling harness remains its open gate.
+- **Resume with:** decide whether to run the deferred medium harness now; if it stays
+  deferred, begin Milestone 7 without closing Milestone 6.
+- **Verification remains deferred and focus shifts:** the learner kept the medium
+  correctness/scaling harness deferred and requested a return to the simple
+  strategy's O(n²) bound before beginning Milestone 7. Milestones 5 and 6 both remain
+  `VERIFYING`.
+- **Resume with:** explain each part of
+  `sum(floor(m / 2), m = 2..n) + 2(n - 1)` against `simple.c`, then have the learner
+  identify which repeated quantities produce the square.
+- **Simple operation bound explained:** the learner connected `n - 1` extraction
+  rounds to the values moved from `a` into `b`, and `floor(m / 2)` rotations per
+  round to bringing the current minimum rank to the top through the shorter
+  direction. Repeating up-to-linear rotation work for about `n` rounds gives O(n²);
+  the `n - 1` `pb` and `n - 1` `pa` operations add only O(n). The focused simple
+  harness remains deferred, so Milestone 5 stays `VERIFYING`.
+- **Resume with:** begin Milestone 7 by comparing two understandable O(n log n)
+  approaches in the generated-operation model; do not choose a method or propose a
+  source file before the learner compares and traces them.
+- **Complex implementation handed off provisionally:** `naamir` chose to skip the
+  complex slice and leave its implementation to the second learner. No partner,
+  method, code, or contribution evidence is confirmed yet, and both learners must
+  ultimately understand the retained algorithm. Milestone 7 remains `LEARNING`, not
+  complete.
+- **Focus shifts to Milestone 8:** inspect the already integrated pure adaptive
+  resolver and its exact `< 0.2`, `0.2 <= d < 0.5`, and `>= 0.5` branches. The high-
+  disorder path cannot sort until the second learner's complex strategy is present.
+- **Resume with:** trace the three adaptive regimes and identify the remaining
+  integration, boundary-test, benchmark-reporting, and documentation gates.
+- **Adaptive boundaries understood:** the learner correctly placed exact disorder
+  `0.20` in the medium interval and exact `0.50` at the start of the complex
+  interval. This is explanation evidence, not execution evidence; focused resolver
+  and exact-boundary tests remain deferred under Milestone 4/8.
+- **Resume with:** contrast a forced selector with adaptive at the same disorder,
+  then settle how benchmark output represents requested and effective strategies.
+- **Requested/effective strategy distinction understood:** for disorder `0.80`, the
+  learner correctly resolved `--adaptive` to complex while keeping forced
+  `--medium` as medium. This follows the pure resolver contract and is explanation
+  evidence only; resolver execution tests remain deferred.
+- **Resume with:** define how benchmark output uses the retained requested strategy
+  together with the resolved method's actual complexity.
+- **Benchmark identity invariant understood:** the learner explained that overwriting
+  `ctx->strategy` with the effective method loses the distinction between what the
+  user requested and what adaptive selected. The retained requested enum plus the
+  pure resolver can therefore report `Adaptive` with the effective complexity.
+- **Resume with:** compare placing the benchmark call inside `prepare_and_sort` after
+  successful strategy execution versus conditioning it in `main`, then choose a
+  narrow reporting interface and cohesive module before implementation.
+- **Benchmark call boundary chosen:** the learner selected `prepare_and_sort`, after
+  successful `run_strategy`, rather than a condition-heavy call in `main`. This
+  naturally excludes parse/strategy failures and flags-only runs while keeping
+  `main`'s existing error/cleanup ownership intact. No source mutation has begun.
+- **Resume with:** compare a read-only whole-context reporter against passing many
+  individual metrics/options, then confirm the interface and module grouping.
+- **Benchmark interface chosen:** the learner selected
+  `void print_benchmark(const t_context *ctx)` and identified protection of the
+  requested strategy as one benefit. The same qualification protects all direct
+  context fields through that parameter; its shallow-pointer limitation still needs
+  a brief understanding check. No source mutation has begun.
+- **Resume with:** clarify shallow `const`, then plan the cohesive reporter helpers
+  needed for size counters, two-decimal disorder, strategy/class, and all 11 metrics.
+- **Direct `const` protection understood:** the learner correctly explained that
+  `ctx->counts[OP_PA]++` is rejected because the context is read-only through the
+  `const t_context *` parameter. The qualification is shallow for separately
+  allocated nodes reached through stored pointers, but the reporter does not need
+  node access.
+- **Resume with:** derive integer formatting for full-width `size_t` counts and a
+  two-decimal disorder percentage, then confirm a Norm-sized `benchmark.c` helper
+  grouping before implementation.
+- **Local `ft_printf` inspected:** the learner identified their earlier project at
+  `/home/naamir/42-core/ft_printf`. It is learner-written and therefore permitted by
+  the subject, but the current implementation hardcodes every write to stdout and
+  supports only the mandatory `cspdiuxX%` conversions—neither `%f` nor `%zu`.
+  Reusing it unchanged would contaminate the operation stream and cannot safely
+  print the required disorder or full-width `size_t` counters.
+- **Resume with:** compare adapting that formatter against two narrow stderr helpers;
+  record the learner's choice before changing or copying any code.
+- **Benchmark helper choice:** the learner selected narrow benchmark-local formatting
+  instead of expanding the earlier `ft_printf`. The next build slice begins with a
+  full-width recursive `size_t` writer and scaled-integer disorder formatting; no
+  source mutation has begun.
+- **Resume with:** trace digit order for the `size_t` recursion, confirm the proposed
+  five-function `benchmark.c` grouping, then have the learner implement that cohesive
+  reporter slice.
+- **Initial benchmark slice implemented:** learner-authored `bench.c` contains a
+  private recursive `size_t` writer and public `print_benchmark` emitting the total
+  label/value/newline to fd 2. Standalone strict compilation and Norm pass. Review
+  found that the final digit is stored in multi-byte `size_t res` while `write`
+  consumes one byte; this happens to work on the current little-endian machine but
+  is not a portable character representation. The file is not declared, built, or
+  called yet, so incomplete benchmark output is unreachable.
+- **Repository-safety note:** an untracked `ft_printf/` copy is also present inside
+  Push_swap despite the later narrow-helper choice. Its intent is unknown; preserve
+  it and do not integrate or remove it without learner direction.
+- **Resume with:** change only the emitted digit object to `char`, have the learner
+  explain the one-byte contract, then ask whether to run or defer a focused
+  full-width/stderr harness.
+- **Counter writer corrected:** `bench.c` now stores the final digit in `char` while
+  retaining the source number as `size_t`. Standalone `-Wall -Wextra -Werror`
+  compilation, Norm for `bench.c`/`push_swap.h`, and `git diff --check` pass. Output
+  behavior remains untested and the partial reporter remains unintegrated.
+- **Workspace note resolved externally:** the previously observed untracked
+  `ft_printf/` copy is no longer present in the working tree; the assistant did not
+  remove it.
+- **Resume with:** obtain the learner's byte-contract explanation and explicit choice
+  to run or defer the focused writer harness.
+- **Writer harness deferred with contract understood:** the learner explained that
+  `char` occupies the one byte requested by `write(..., 1)` and chose not to run the
+  focused full-width/stderr harness now. The writer remains implementation evidence,
+  not verified output behavior.
+- **Resume with:** design the disorder formatter using rounded integer hundredths of
+  a percent, including a leading zero when the fractional part is below ten.
+- **First disorder-formatting attempt:** the learner added scaled integer output and
+  the leading-zero branch directly inside `print_benchmark`. Strict standalone
+  compilation and Norm still pass. Review found truncation because scaling omits
+  `+ 0.5`, and the output ends with a newline without the required percentage sign.
+  Extracting the block into the planned private `print_disorder` now preserves room
+  for strategy and metric reporting under the five-function/25-line Norm limits.
+  The subject's illustrated form also places disorder first and spells the total
+  label `total_ops`; output behavior remains untested by learner choice.
+- **Resume with:** make only that focused extraction/rounding/suffix correction and
+  rerun routine strict compilation and Norm before adding strategy reporting.
+- **Second disorder-formatting attempt:** the learner extracted `print_disorder`,
+  added rounding, emitted `%`, placed disorder before the `total_ops` line, and kept
+  the public coordinator compact. Norm passes. Strict compilation correctly fails
+  because `scaled / 100` is printed before `scaled` receives the disorder-derived
+  value; reading that uninitialized automatic object is undefined behavior. Setting
+  it to zero at declaration would silence the warning but print the wrong whole
+  percentage, so the calculation must move before both output divisions.
+- **Resume with:** reorder only that assignment, rerun strict compilation and Norm,
+  and have the learner explain why calculation must precede both reads.
+- **Disorder formatter builds cleanly:** the scaled calculation now precedes the
+  whole and fractional reads. The private helper emits the illustrated disorder
+  label, rounded two-decimal value with zero padding, percent sign, and newline;
+  `print_benchmark` emits disorder before `total_ops`. Standalone strict compilation,
+  Norm, and `git diff --check` pass. The output harness remains explicitly deferred,
+  so these formatting behaviors are code-review conclusions rather than captured
+  stream evidence.
+- **Resume with:** add the private strategy reporter, keeping requested-name and
+  effective-complexity selection distinct, then rerun routine compile/Norm checks.
+- **First strategy-reporting attempt:** learner-authored `print_strategy` derives the
+  requested enum, prints all four requested names, and resolves an effective enum.
+  Norm passes, but strict standalone compilation rejects the unused static helper
+  because `print_benchmark` does not call it. Review also shows the complexity
+  branches mistakenly retest the requested `strategy`, leaving adaptive with no
+  complexity text, and the current name lengths plus `"/ "` omit the space before
+  the slash. Output testing remains deferred.
+- **Resume with:** call the helper between disorder and total, branch the three
+  complexity labels on `complexity`, and use a clear `" / "` separator before
+  rerunning strict compilation and Norm.
+- **Strategy reporter builds cleanly:** `print_benchmark` now calls the private helper
+  between disorder and total; requested names branch on `ctx->strategy`, complexity
+  labels branch on the resolved enum, and `" / "` produces the illustrated spacing.
+  Strict standalone compilation, Norm, and `git diff --check` pass. Captured output
+  remains learner-deferred.
+- **Resume with:** design `print_counts` as the fifth function using a local label
+  table indexed in the same `t_operation` order as `ctx->counts`, with a line break
+  between `pb` and `ra`, before implementing it.
+- **Counter reporter draft begun:** the learner created all 11 label assignments in
+  the correct enum order inside `print_counts`. The helper is currently public,
+  contains no output loop, and is not called. Norm passes, while strict standalone
+  compilation rejects the unused `ctx` parameter. The learner reported being unsure
+  how to translate the table into the two-line output loop, so the next teaching step
+  is one focused C helper rather than another abstract hint.
+- **Resume with:** replace the repetitive assignments with a compact local const
+  table, loop from zero through `OP_COUNT`, emit prefixes/separators/newlines at the
+  enum boundaries, make the helper `static`, and call it after `total_ops`.
+- **Standalone benchmark reporter completed:** at the learner's explicit request,
+  the AI removed the obsolete duplicate public draft, retained one private
+  `print_counts`, added a local const label table and enum-indexed two-line loop, and
+  called it after `total_ops`. A follow-up formatting-only adjustment aligned the
+  compound const declaration for Norm. `bench.c` now has exactly five functions and
+  passes standalone `-Wall -Wextra -Werror`, Norm, and `git diff --check`. The file
+  remains undeclared, absent from the Makefile, and uncalled by `prepare_and_sort`;
+  the learner-deferred output harness also remains open.
+- **Resume with:** have the learner explain why `labels[i]` and `counts[i]` must share
+  enum order and why line boundaries use `OP_PB`/`OP_RA`, then begin integration only
+  on explicit learner action.
